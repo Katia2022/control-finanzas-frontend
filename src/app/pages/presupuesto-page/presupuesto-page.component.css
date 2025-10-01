@@ -1,2 +1,5 @@
 .view { display: flex; flex-direction: column; gap: 2rem; }
 
+.savings-banner { border: 1px solid #e5e7eb; background: #f8fafc; padding: 12px; border-radius: 10px; }
+.savings-banner h3 { margin: 0 0 6px; font-size: 1rem; }
+.savings-banner .link { display: inline-block; margin-top: 6px; }

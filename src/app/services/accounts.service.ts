@@ -1,12 +1,18 @@
-import { Injectable, signal } from '@angular/core';
-
-const STORAGE_KEY = 'app.accounts';
-const INITIALS_KEY = 'app.accounts.initials';
+import { Injectable, inject, signal } from '@angular/core';
+import { AccountsApi, AccountView } from '../api/accounts.api';
 
 @Injectable({ providedIn: 'root' })
 export class AccountsService {
-  readonly accounts = signal<string[]>(this.load());
-  readonly initialBalances = signal<Record<string, number>>(this.loadInitials());
+  private readonly api = inject(AccountsApi);
+  readonly accounts = signal<string[]>([]);
+  readonly initialBalances = signal<Record<string, number>>({});
+  readonly lastError = signal<string | null>(null);
+  readonly lastInfo = signal<string | null>(null);
+  private lastList: AccountView[] = [];
+
+  constructor() {
+    this.refresh();
+  }
 
   add(name: string): void {
     const trimmed = name.trim();
@@ -17,41 +23,42 @@ export class AccountsService {
   }
 
   remove(name: string): void {
-    const next = this.accounts().filter(c => c !== name);
-    this.update(next);
-    // Remove initial balance for this account
-    const map = { ...this.initialBalances() };
-    delete map[name];
-    this.updateInitials(map);
+    const acc = this.lastList.find(a => a.name === name);
+    if (!acc) { this.lastError.set('Cuenta no encontrada.'); return; }
+    this.api.delete(acc.id).subscribe({
+      next: () => { this.lastInfo.set('Cuenta eliminada.'); this.lastError.set(null); this.refresh(); },
+      error: () => { this.lastError.set('No se pudo eliminar la cuenta (puede tener movimientos asociados).'); },
+    });
   }
 
   rename(prev: string, nextName: string): void {
     const trimmed = nextName.trim();
     if (!trimmed) return;
-    const list = this.accounts().map(c => (c === prev ? trimmed : c));
-    this.update(Array.from(new Set(list)).sort((a, b) => a.localeCompare(b)));
-    // Move initial balance key if exists
-    const map = { ...this.initialBalances() };
-    if (map[prev] != null) {
-      const val = map[prev];
-      delete map[prev];
-      map[trimmed] = val;
-      this.updateInitials(map);
-    }
+    const acc = this.lastList.find(a => a.name === prev);
+    if (!acc) { this.lastError.set('Cuenta no encontrada.'); return; }
+    this.api.update(acc.id, { name: trimmed }).subscribe({
+      next: () => { this.lastInfo.set('Cuenta renombrada.'); this.lastError.set(null); this.refresh(); },
+      error: (err) => { this.lastError.set(err?.status === 409 ? 'Ya existe una cuenta con ese nombre.' : 'No se pudo renombrar la cuenta.'); },
+    });
   }
 
   ensure(name: string): void { this.add(name); }
 
-  private update(list: string[]) {
-    this.accounts.set(list);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  }
+  private update(list: string[]) { this.accounts.set(list); }
 
   setInitial(name: string, amount: number) {
     if (!name.trim() || !Number.isFinite(amount)) return;
-    const map = { ...this.initialBalances() };
-    map[name] = amount;
-    this.updateInitials(map);
+    const acc = this.lastList.find(a => a.name === name);
+    if (!acc) { this.lastError.set('Cuenta no encontrada.'); return; }
+    this.api.update(acc.id, { initialBalance: amount }).subscribe({
+      next: () => {
+        const map = { ...this.initialBalances() };
+        map[name] = amount;
+        this.updateInitials(map);
+        this.lastInfo.set('Saldo inicial actualizado.'); this.lastError.set(null);
+      },
+      error: () => { this.lastError.set('No se pudo actualizar el saldo inicial.'); },
+    });
   }
 
   getInitial(name: string): number {
@@ -59,24 +66,19 @@ export class AccountsService {
     return Number.isFinite(v as number) ? (v as number) : 0;
   }
 
-  private updateInitials(map: Record<string, number>) {
-    this.initialBalances.set(map);
-    localStorage.setItem(INITIALS_KEY, JSON.stringify(map));
-  }
+  private updateInitials(map: Record<string, number>) { this.initialBalances.set(map); }
 
-  private load(): string[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return [];
-  }
-
-  private loadInitials(): Record<string, number> {
-    try {
-      const raw = localStorage.getItem(INITIALS_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return {};
+  private refresh() {
+    this.api.list().subscribe({
+      next: (list) => {
+        this.lastList = list;
+        this.accounts.set(list.map(a => a.name).sort((a, b) => a.localeCompare(b)));
+        const initials: Record<string, number> = {};
+        list.forEach(a => { initials[a.name] = a.initialBalance ?? 0; });
+        this.initialBalances.set(initials);
+        this.lastError.set(null);
+      },
+      error: () => this.lastError.set('No se pudieron cargar las cuentas.'),
+    });
   }
 }

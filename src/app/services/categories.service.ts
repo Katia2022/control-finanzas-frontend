@@ -1,44 +1,56 @@
-import { Injectable, signal } from '@angular/core';
-
-const STORAGE_KEY = 'app.categories';
+import { Injectable, inject, signal } from '@angular/core';
+import { CategoriesApi } from '../api/categories.api';
 
 @Injectable({ providedIn: 'root' })
 export class CategoriesService {
-  readonly categories = signal<string[]>(this.load());
+  private readonly api = inject(CategoriesApi);
+  readonly categories = signal<string[]>([]);
+  private lastList: { id: number; name: string }[] = [];
+  readonly lastError = signal<string | null>(null);
+  readonly lastInfo = signal<string | null>(null);
+
+  constructor() {
+    this.refresh();
+  }
 
   add(name: string): void {
     const trimmed = name.trim();
     if (!trimmed) return;
-    const set = new Set(this.categories());
-    set.add(trimmed);
-    this.update([...set].sort((a, b) => a.localeCompare(b)));
+    this.api.create(trimmed).subscribe({
+      next: () => { this.lastInfo.set('Categoría creada.'); this.lastError.set(null); this.refresh(); },
+      error: () => { this.lastError.set('No se pudo crear la categoría.'); },
+    });
   }
 
   remove(name: string): void {
-    const next = this.categories().filter(c => c !== name);
-    this.update(next);
+    const found = this.lastList.find(c => c.name === name);
+    if (!found) { this.lastError.set('Categoría no encontrada.'); return; }
+    this.api.delete(found.id).subscribe({
+      next: () => { this.lastInfo.set('Categoría eliminada.'); this.lastError.set(null); this.refresh(); },
+      error: () => { this.lastError.set('No se pudo eliminar la categoría.'); },
+    });
   }
 
   rename(prev: string, nextName: string): void {
     const trimmed = nextName.trim();
     if (!trimmed) return;
-    const list = this.categories().map(c => (c === prev ? trimmed : c));
-    this.update(Array.from(new Set(list)).sort((a, b) => a.localeCompare(b)));
+    const found = this.lastList.find(c => c.name === prev);
+    if (!found) { this.lastError.set('Categoría no encontrada.'); return; }
+    this.api.rename(found.id, trimmed).subscribe({
+      next: () => { this.lastInfo.set('Categoría renombrada.'); this.lastError.set(null); this.refresh(); },
+      error: () => { this.lastError.set('No se pudo renombrar la categoría.'); },
+    });
   }
 
   ensure(name: string): void { this.add(name); }
 
-  private update(list: string[]) {
-    this.categories.set(list);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  }
+  private update(list: string[]) { this.categories.set(list); }
 
-  private load(): string[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return [];
+  private refresh() {
+    this.api.list().subscribe({ next: list => {
+      this.lastList = list || [];
+      this.categories.set(this.lastList.map(c => c.name).sort((a, b) => a.localeCompare(b)));
+      this.lastError.set(null);
+    }, error: () => this.lastError.set('No se pudieron cargar las categorías.') });
   }
 }
-

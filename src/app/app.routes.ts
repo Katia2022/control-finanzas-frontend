@@ -5,6 +5,7 @@ import { CategoriasPageComponent } from './pages/categorias-page/categorias-page
 import { PresupuestoPageComponent } from './pages/presupuesto-page/presupuesto-page.component';
 import { CuentasPageComponent } from './pages/cuentas-page/cuentas-page.component';
 import { ConfiguracionPageComponent } from './pages/configuracion-page/configuracion-page.component';
+import { SavingsPageComponent } from './pages/ahorro-page/savings-page.component';
 
 export const routes: Routes = [
   { path: '', component: ResumenPageComponent },
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: 'categorias', component: CategoriasPageComponent },
   { path: 'cuentas', component: CuentasPageComponent },
   { path: 'presupuesto', component: PresupuestoPageComponent },
+  { path: 'ahorro', component: SavingsPageComponent },
   { path: 'configuracion', component: ConfiguracionPageComponent },
   { path: '**', redirectTo: '' },
 ];

@@ -24,6 +24,8 @@ export class MovimientosPageComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   filterAccount = this.fb.control<string>('');
   private descSub?: Subscription;
+  readonly errorMsg = this.tx.lastError;
+  readonly infoMsg = this.tx.lastInfo;
 
   readonly form = this.fb.group({
     type: this.fb.control<'income' | 'expense'>('income', { nonNullable: true }),

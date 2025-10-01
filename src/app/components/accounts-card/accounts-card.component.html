@@ -5,17 +5,33 @@
   </header>
 
   <form class="row-add" (ngSubmit)="add()">
+    <div class="messages">
+      <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
+      <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
+    </div>
     <input type="text" [formControl]="newAccCtrl" placeholder="Nueva cuenta" />
+    <select [formControl]="newAccType" title="Tipo">
+      <option value="OPERATIVA">Operativa</option>
+      <option value="AHORRO">Ahorro</option>
+    </select>
     <button type="submit" class="button">Añadir</button>
   </form>
   @if (newAccCtrl.touched && newAccCtrl.invalid) {
     <small class="error">Nombre requerido (máx. 40).</small>
+  }
+  @if (addError()) {
+    <small class="error">{{ addError() }}</small>
   }
 
   <ul class="list">
     <li *ngFor="let acc of accounts()">
       @if (editing() !== acc) {
         <span class="name">{{ acc }}</span>
+        @if (typeOf(acc) === 'AHORRO') {
+          <span class="chip chip--ahorro">Ahorro</span>
+        } @else if (typeOf(acc) === 'OPERATIVA') {
+          <span class="chip chip--operativa">Operativa</span>
+        }
         <div class="actions">
           <button class="link" type="button" (click)="startEdit(acc)">Editar</button>
           <button class="link danger" type="button" (click)="remove(acc)">Eliminar</button>

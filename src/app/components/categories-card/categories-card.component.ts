@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CategoriesService } from '../../services/categories.service';
 
@@ -11,11 +11,11 @@ import { CategoriesService } from '../../services/categories.service';
   styleUrl: './categories-card.component.css',
 })
 export class CategoriesCardComponent {
-  @Output() renamed = new EventEmitter<{ prev: string; next: string }>();
-  @Output() removed = new EventEmitter<string>();
   private readonly categoriesSvc = inject(CategoriesService);
   private readonly fb = inject(FormBuilder);
   readonly categories = this.categoriesSvc.categories;
+  readonly errorMsg = this.categoriesSvc.lastError;
+  readonly infoMsg = this.categoriesSvc.lastInfo;
 
   // UI state
   newCatCtrl = this.fb.control('', { validators: [Validators.required, Validators.maxLength(40)] });
@@ -41,7 +41,6 @@ export class CategoriesCardComponent {
     const val = (this.editCtrl.value ?? '').toString().trim();
     if (prev && val) {
       this.categoriesSvc.rename(prev, val);
-      this.renamed.emit({ prev, next: val });
     }
     this.cancelEdit();
   }
@@ -53,6 +52,5 @@ export class CategoriesCardComponent {
 
   remove(name: string) {
     this.categoriesSvc.remove(name);
-    this.removed.emit(name);
   }
 }

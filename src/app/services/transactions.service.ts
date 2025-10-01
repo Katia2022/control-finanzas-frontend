@@ -3,6 +3,9 @@ import { CategoriesService } from './categories.service';
 import { AccountsService } from './accounts.service';
 import { SettingsService } from './settings.service';
 import { BudgetService } from './budget.service';
+import { TransactionsApi, TransactionDTO } from '../api/transactions.api';
+import { CategoriesApi } from '../api/categories.api';
+import { AccountsApi } from '../api/accounts.api';
 
 export interface Transaction {
   id: number;
@@ -31,6 +34,11 @@ export class TransactionsService {
   private nextId = 1;
   private static readonly TX_KEY = 'app.transactions';
   private static readonly CURR_KEY = 'app.currency';
+  private readonly txApi = inject(TransactionsApi);
+  private readonly catsApi = inject(CategoriesApi);
+  private readonly accApi = inject(AccountsApi);
+  private catIdByName = new Map<string, number>();
+  private accIdByName = new Map<string, number>();
 
   private buildTransaction(
     type: Transaction['type'],
@@ -51,28 +59,26 @@ export class TransactionsService {
     };
   }
 
-  readonly currencyCode = signal<'MXN' | 'USD' | 'EUR'>(this.loadCurrency());
+  readonly currencyCode = computed(() => this.settingsSvc.settings().currencyCode);
   readonly locale = 'pt-PT';
-  readonly transactions = signal<Transaction[]>(this.loadTransactions());
+  readonly transactions = signal<Transaction[]>([]);
+  readonly lastError = signal<string | null>(null);
+  readonly lastInfo = signal<string | null>(null);
 
   constructor() {
-    // Seed categories from transactions if empty
-    if (this.categoriesSvc.categories().length === 0 && this.transactions().length) {
-      const unique = Array.from(new Set(this.transactions().map(t => t.category)))
-        .sort((a, b) => a.localeCompare(b));
-      unique.forEach(c => this.categoriesSvc.add(c));
-    }
-
-    // Seed accounts from transactions if empty
-    if (this.accountsSvc.accounts().length === 0 && this.transactions().length) {
-      const unique = Array.from(new Set(this.transactions().map(t => t.account)))
-        .sort((a, b) => a.localeCompare(b));
-      unique.forEach(a => this.accountsSvc.add(a));
-    }
-
-    // Ensure nextId continues from stored transactions
-    const maxId = this.transactions().reduce((m, t) => Math.max(m, t.id), 0);
-    this.nextId = Math.max(1, maxId + 1);
+    // Hydrate category/account maps then transactions
+    this.catsApi.list().subscribe(list => {
+      (list || []).forEach(c => this.catIdByName.set(c.name, c.id));
+    });
+    this.accApi.list().subscribe(list => {
+      (list || []).forEach(a => this.accIdByName.set(a.name, a.id));
+    });
+    const mk = this.currentMonthKey();
+    this.txApi.list(mk).subscribe(list => {
+      this.transactions.set((list || []).map(this.fromDto.bind(this)));
+      const maxId = this.transactions().reduce((m, t) => Math.max(m, t.id), 0);
+      this.nextId = Math.max(1, maxId + 1);
+    });
   }
 
   // Computed values
@@ -205,16 +211,63 @@ export class TransactionsService {
 
   // Actions
   addTransaction(t: Omit<Transaction, 'id'>) {
-    const tx: Transaction = { id: this.nextId++, ...t };
-    this.transactions.update((curr) => [tx, ...curr]);
-    this.saveTransactions();
-    this.categoriesSvc.ensure(tx.category);
-    this.accountsSvc.ensure(tx.account);
+    let accountId = this.accIdByName.get(t.account);
+    let categoryId = this.catIdByName.get(t.category);
+
+    const proceed = () => this.txApi.create({
+      type: t.type === 'income' ? 'INCOME' : 'EXPENSE',
+      accountId: accountId as number, categoryId: categoryId as number,
+      amount: t.amount,
+      date: t.date,
+      description: t.description,
+    }).subscribe({
+      next: (dto) => {
+        const tx = this.fromDto(dto);
+        this.transactions.update((curr) => [tx, ...curr]);
+        this.lastInfo.set('Movimiento agregado.');
+        this.lastError.set(null);
+      },
+      error: () => {
+        this.lastError.set('No se pudo guardar el movimiento.');
+      },
+    });
+
+    // Create missing category/account on the fly if needed
+    const ensureCategory = (): Promise<void> => new Promise((resolve) => {
+      if (categoryId) return resolve();
+      this.catsApi.create(t.category).subscribe({
+        next: (c) => { this.catIdByName.set(c.name, c.id); categoryId = c.id; resolve(); },
+        error: () => { this.lastError.set('Categoría no encontrada.'); resolve(); },
+      });
+    });
+
+    const ensureAccount = (): Promise<void> => new Promise((resolve) => {
+      if (accountId) return resolve();
+      // Por defecto, creamos cuentas nuevas como OPERATIVA
+      this.accApi.create({ name: t.account, type: 'OPERATIVA' }).subscribe({
+        next: (a) => { this.accIdByName.set(a.name, a.id); accountId = a.id; resolve(); },
+        error: () => { this.lastError.set('Cuenta no encontrada.'); resolve(); },
+      });
+    });
+
+    Promise.all([ensureCategory(), ensureAccount()]).then(() => {
+      if (!accountId || !categoryId) {
+        // Mensajes ya seteados por ensures
+        return;
+      }
+      proceed();
+    });
   }
 
   removeTransaction(id: number) {
-    this.transactions.update((curr) => curr.filter(t => t.id !== id));
-    this.saveTransactions();
+    this.txApi.delete(id).subscribe({
+      next: () => {
+        this.transactions.update((curr) => curr.filter(t => t.id !== id));
+        this.lastInfo.set('Movimiento eliminado.');
+        this.lastError.set(null);
+      },
+      error: () => this.lastError.set('No se pudo eliminar el movimiento.'),
+    });
   }
 
   renameCategory(prev: string, next: string) {
@@ -244,52 +297,27 @@ export class TransactionsService {
   }
 
   setCurrency(code: 'MXN' | 'USD' | 'EUR') {
-    this.currencyCode.set(code);
-    try { localStorage.setItem(TransactionsService.CURR_KEY, code); } catch {}
+    this.settingsSvc.setCurrency(code);
   }
 
-  private saveTransactions() {
-    try {
-      localStorage.setItem(TransactionsService.TX_KEY, JSON.stringify(this.transactions()));
-    } catch {}
-  }
+  private saveTransactions() { /* no-op: persisted in API */ }
 
-  private loadTransactions(): Transaction[] {
-    try {
-      const raw = localStorage.getItem(TransactionsService.TX_KEY);
-      if (raw) {
-        const list = JSON.parse(raw) as any[];
-        // Migrate older records without account
-        return list.map((t, idx) => ({
-          id: t.id ?? (idx + 1),
-          type: t.type,
-          category: t.category,
-          account: t.account || 'General',
-          description: t.description,
-          amount: t.amount,
-          date: t.date,
-        })) as Transaction[];
-      }
-    } catch {}
-    // Fallback seed data on first load
-    return [
-      this.buildTransaction('income', 'Salario', 'Nómina', 'Pago mensual', 28000, '2024-06-28'),
-      this.buildTransaction('expense', 'Vivienda', 'Tarjeta', 'Renta departamento', 9500, '2024-07-01'),
-      this.buildTransaction('expense', 'Transporte', 'Efectivo', 'Gasolina y mantenimiento', 1800, '2024-07-03'),
-      this.buildTransaction('income', 'Freelance', 'Nómina', 'Proyecto de diseño', 4200, '2024-07-08'),
-      this.buildTransaction('expense', 'Alimentos', 'Tarjeta', 'Supermercado semanal', 2200, '2024-07-11'),
-      this.buildTransaction('expense', 'Servicios', 'Nómina', 'Luz e internet', 1350, '2024-07-12'),
-      this.buildTransaction('income', 'Reembolso', 'Efectivo', 'Devolución de impuestos', 3500, '2024-04-20'),
-      this.buildTransaction('expense', 'Entretenimiento', 'Tarjeta', 'Suscripciones', 650, '2024-06-15'),
-      this.buildTransaction('expense', 'Salud', 'Efectivo', 'Consulta médica', 900, '2024-05-18'),
-    ];
-  }
+  private loadTransactions(): Transaction[] { return []; }
 
-  private loadCurrency(): 'MXN' | 'USD' | 'EUR' {
-    try {
-      const raw = localStorage.getItem(TransactionsService.CURR_KEY);
-      if (raw === 'MXN' || raw === 'USD' || raw === 'EUR') return raw;
-    } catch {}
-    return 'EUR';
+  private loadCurrency(): 'MXN' | 'USD' | 'EUR' { return 'MXN'; }
+
+  private fromDto(dto: TransactionDTO): Transaction {
+    // Map ids back to names using known maps; if missing, use string ids as fallback
+    const accountName = [...this.accIdByName.entries()].find(([name, id]) => id === dto.accountId)?.[0] || String(dto.accountId);
+    const categoryName = [...this.catIdByName.entries()].find(([name, id]) => id === dto.categoryId)?.[0] || String(dto.categoryId);
+    return {
+      id: dto.id,
+      type: dto.type === 'INCOME' ? 'income' : 'expense',
+      category: categoryName,
+      account: accountName,
+      description: dto.description,
+      amount: dto.amount,
+      date: dto.date,
+    };
   }
 }

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { MigrationService } from './services/migration.service';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -9,5 +10,7 @@ import { RouterModule } from '@angular/router';
   styleUrl: './app.css',
 })
 export class App {
-  // Shell: all state moved to dedicated services and pages
+  // Run one-time local -> backend migration at startup
+  private readonly migrator = inject(MigrationService);
+  constructor() { this.migrator.migrateIfNeeded(); }
 }

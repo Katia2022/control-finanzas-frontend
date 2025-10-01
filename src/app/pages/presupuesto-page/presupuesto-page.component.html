@@ -1,8 +1,22 @@
 <section class="view">
+  <div>
+    <p class="error" *ngIf="budgetSvc.lastError?.() as err2">{{ err2 }}</p>
+    <p class="info" *ngIf="budgetSvc.lastInfo?.() as msg">{{ msg }}</p>
+  </div>
+  <article class="savings-banner" *ngIf="plannedSavingsThisMonth() > 0">
+    <div>
+      <h3>Ahorro planeado este mes</h3>
+      <p>
+        Planeado: <strong>{{ plannedSavingsThisMonth() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+        · Ingresos: <strong>{{ incomeThisMonth() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+        · Disponible para gastos: <strong>{{ availableForExpenses() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+      </p>
+      <a routerLink="/ahorro" class="link">Gestionar ahorro</a>
+    </div>
+  </article>
   <app-budget-card
     [categories]="categoriesSvc.categories()"
     [transactions]="tx.transactions()"
     [currencyCode]="tx.currencyCode()"
   />
 </section>
-

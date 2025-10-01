@@ -4,6 +4,11 @@
     <p>Gestiona las categorías disponibles.</p>
   </header>
 
+  <div class="messages">
+    <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
+    <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
+  </div>
+
   <form class="row-add" (ngSubmit)="add()">
     <input type="text" [formControl]="newCatCtrl" placeholder="Nueva categoría" />
     <button type="submit" class="button">Añadir</button>
