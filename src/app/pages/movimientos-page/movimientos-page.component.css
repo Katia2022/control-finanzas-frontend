@@ -1,0 +1,2 @@
+.grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.full-width { grid-column: 1 / -1; }

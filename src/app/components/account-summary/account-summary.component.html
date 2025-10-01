@@ -1,0 +1,30 @@
+<article class="card summaries-card">
+  <header class="card__header">
+    <h2>Resumen por cuenta</h2>
+    <p>Distribución de gastos por cuenta.</p>
+  </header>
+  @if (accountTotals.length) {
+    <div class="account-grid">
+      <article class="account-card" *ngFor="let item of accountTotals">
+        <header>
+          <h3 class="account-card__name">{{ item.account }}</h3>
+          <p class="account-card__balance" [class.positive]="item.balance >= 0" [class.negative]="item.balance < 0">
+            {{ item.balance | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}
+          </p>
+        </header>
+        <dl class="account-card__totals">
+          <div>
+            <dt>Ingresos</dt>
+            <dd class="income">{{ item.income | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
+          </div>
+          <div>
+            <dt>Gastos</dt>
+            <dd class="expense">{{ item.expense | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+  } @else {
+    <p class="empty">Aún no registras gastos.</p>
+  }
+</article>

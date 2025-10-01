@@ -1,0 +1,14 @@
+<main class="layout">
+  <header class="topnav">
+    <nav class="tabs">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tab">Resumen</a>
+      <a routerLink="/movimientos" routerLinkActive="active" class="tab">Movimientos</a>
+      <a routerLink="/categorias" routerLinkActive="active" class="tab">Categorías</a>
+      <a routerLink="/cuentas" routerLinkActive="active" class="tab">Cuentas</a>
+      <a routerLink="/presupuesto" routerLinkActive="active" class="tab">Presupuesto</a>
+      <a routerLink="/configuracion" routerLinkActive="active" class="tab">Configuración</a>
+    </nav>
+  </header>
+
+  <router-outlet />
+</main>

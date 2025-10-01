@@ -1,0 +1,31 @@
+<section class="hero">
+  <div>
+    <p class="hero__eyebrow">Panel financiero</p>
+    <h1>Control de finanzas del hogar</h1>
+    <p class="hero__subtitle">
+      Registra tus ingresos y gastos, visualiza tus tendencias mensuales y toma decisiones informadas
+      sobre tu presupuesto familiar.
+    </p>
+  </div>
+  <article class="balance-card">
+    <p class="balance-card__label">Balance actual</p>
+    <p class="balance-card__amount">
+      {{ balance | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}
+    </p>
+    <dl class="balance-card__totals">
+      <div>
+        <dt>Ingresos</dt>
+        <dd>{{ totalIncome | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
+      </div>
+      <div>
+        <dt>Gastos</dt>
+        <dd>{{ totalExpense | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
+      </div>
+      <div>
+        <dt>Ahorro</dt>
+        <dd>{{ (savingsRate * 100) | number: '1.0-1' }}%</dd>
+      </div>
+    </dl>
+  </article>
+</section>
+

@@ -1,0 +1,38 @@
+<article class="card">
+  <header class="card__header">
+    <h2>Cuentas</h2>
+    <p>Gestiona las cuentas disponibles.</p>
+  </header>
+
+  <form class="row-add" (ngSubmit)="add()">
+    <input type="text" [formControl]="newAccCtrl" placeholder="Nueva cuenta" />
+    <button type="submit" class="button">Añadir</button>
+  </form>
+  @if (newAccCtrl.touched && newAccCtrl.invalid) {
+    <small class="error">Nombre requerido (máx. 40).</small>
+  }
+
+  <ul class="list">
+    <li *ngFor="let acc of accounts()">
+      @if (editing() !== acc) {
+        <span class="name">{{ acc }}</span>
+        <div class="actions">
+          <button class="link" type="button" (click)="startEdit(acc)">Editar</button>
+          <button class="link danger" type="button" (click)="remove(acc)">Eliminar</button>
+        </div>
+      } @else {
+        <input type="text" [formControl]="editCtrl" />
+        <div class="actions">
+          <button class="link" type="button" (click)="saveEdit()">Guardar</button>
+          <button class="link" type="button" (click)="cancelEdit()">Cancelar</button>
+        </div>
+      }
+      <div class="initial">
+        <label>
+          <span>Saldo inicial</span>
+          <input type="number" step="0.01" [value]="initialOf(acc)" (change)="updateInitial(acc, ($any($event.target)).valueAsNumber)" />
+        </label>
+      </div>
+    </li>
+  </ul>
+</article>

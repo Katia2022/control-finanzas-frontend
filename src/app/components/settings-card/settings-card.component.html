@@ -1,0 +1,19 @@
+<article class="card">
+  <header class="card__header">
+    <h2>Configuración</h2>
+    <p>Ajusta reglas del panel.</p>
+  </header>
+
+  <div class="row">
+    <label>
+      <span>Regla de ahorro mínimo (%)</span>
+      <input type="number" [value]="percent()" min="0" max="100" step="1"
+             (input)="onPercentChange(($any($event.target)).valueAsNumber)" />
+    </label>
+    <input class="range" type="range" [value]="percent()" min="0" max="50" step="1"
+           (input)="onPercentChange(($any($event.target)).valueAsNumber)" />
+  </div>
+
+  <p class="note">Consejo se activa si tu tasa de ahorro actual es menor a este porcentaje.</p>
+</article>
+

@@ -1,0 +1,8 @@
+<section class="view">
+  <app-budget-card
+    [categories]="categoriesSvc.categories()"
+    [transactions]="tx.transactions()"
+    [currencyCode]="tx.currencyCode()"
+  />
+</section>
+

@@ -1,0 +1,76 @@
+<article class="card form-card">
+  <header class="card__header">
+    <h2>Registrar movimiento</h2>
+    <p>Captura cada ingreso o gasto para mantener actualizado tu balance.</p>
+  </header>
+  <form [formGroup]="form" (ngSubmit)="submitted.emit()" class="form">
+    <div class="form__row">
+      <label class="form__field">
+        <span>Tipo</span>
+        <select formControlName="type">
+          <option value="income">Ingreso</option>
+          <option value="expense">Gasto</option>
+        </select>
+      </label>
+      <label class="form__field">
+        <span>Fecha</span>
+        <input type="date" formControlName="date" />
+        @if (form.get('date')?.touched && form.get('date')?.invalid) {
+          <small>
+            Selecciona una fecha válida.
+          </small>
+        }
+      </label>
+    </div>
+    <div class="form__row">
+      <label class="form__field">
+        <span>Categoría</span>
+        <input type="text" formControlName="category" placeholder="Ej. Supermercado" [attr.list]="'categories-list'" />
+        @if (form.get('category')?.touched && form.get('category')?.invalid) {
+          <small>
+            La categoría es obligatoria y debe tener menos de 40 caracteres.
+          </small>
+        }
+      </label>
+      <label class="form__field">
+        <span>Cuenta</span>
+        <input type="text" formControlName="account" placeholder="Ej. Tarjeta" [attr.list]="'accounts-list'" />
+        @if (form.get('account')?.touched && form.get('account')?.invalid) {
+          <small>
+            La cuenta es obligatoria y debe tener menos de 40 caracteres.
+          </small>
+        }
+      </label>
+      <label class="form__field">
+        <span>Monto</span>
+        <input type="number" formControlName="amount" step="0.01" min="0" placeholder="0.00" />
+        @if (form.get('amount')?.touched && form.get('amount')?.invalid) {
+          <small>
+            Ingresa un monto mayor a cero.
+          </small>
+        }
+      </label>
+    </div>
+    <label class="form__field">
+      <span>Descripción (opcional)</span>
+      <input type="text" formControlName="description" placeholder="Notas adicionales" [attr.list]="'fixed-names-list'" />
+    </label>
+    <button type="submit" class="button">Guardar movimiento</button>
+  </form>
+</article>
+
+<!-- Suggestions for category input -->
+<datalist id="categories-list">
+  <option *ngFor="let c of categories" [value]="c"></option>
+  <!-- note: list is provided by parent via input binding -->
+</datalist>
+
+<!-- Suggestions for description based on fixed expenses of selected category -->
+<datalist id="fixed-names-list">
+  <option *ngFor="let n of fixedNames" [value]="n"></option>
+</datalist>
+
+<!-- Suggestions for account input -->
+<datalist id="accounts-list">
+  <option *ngFor="let a of accounts" [value]="a"></option>
+</datalist>

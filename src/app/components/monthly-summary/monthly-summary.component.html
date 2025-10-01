@@ -1,0 +1,28 @@
+<article class="card summaries-card">
+  <header class="card__header">
+    <h2>Resumen mensual</h2>
+    <p>Compara ingresos y gastos por mes.</p>
+  </header>
+  @if (monthlySummaries.length) {
+    <ul class="monthly-list">
+      <li *ngFor="let month of monthlySummaries">
+        <div>
+          <p class="monthly-list__label">{{ month.label | titlecase }}</p>
+          <p class="monthly-list__detail">
+            Ingresos:
+            <strong>{{ month.income | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+          </p>
+          <p class="monthly-list__detail">
+            Gastos:
+            <strong>{{ month.expense | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+          </p>
+        </div>
+        <div class="monthly-list__balance" [class.monthly-list__balance--positive]="month.income - month.expense >= 0">
+          {{ (month.income - month.expense) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}
+        </div>
+      </li>
+    </ul>
+  } @else {
+    <p class="empty">Registra movimientos para generar el historial mensual.</p>
+  }
+</article>

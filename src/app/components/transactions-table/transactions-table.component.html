@@ -1,0 +1,57 @@
+<article class="card table-card">
+  <header class="card__header">
+    <div class="header-top">
+      <div>
+        <h2>Movimientos recientes</h2>
+        <p>Organizados del más nuevo al más antiguo.</p>
+      </div>
+      <div class="table-filter" *ngIf="filterControl">
+        <label class="filter-label">
+          <span>Filtrar por cuenta:</span>
+          <input type="text" [formControl]="filterControl" placeholder="Todas" list="accounts-filter-list" />
+        </label>
+        <datalist id="accounts-filter-list">
+          <option *ngFor="let a of accounts" [value]="a"></option>
+        </datalist>
+      </div>
+    </div>
+  </header>
+  @if (transactions.length) {
+    <div class="table-wrapper">
+      <table>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Cuenta</th>
+          <th scope="col">Descripción</th>
+          <th scope="col" class="amount">Monto</th>
+          <th scope="col" class="actions">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let transaction of transactions; trackBy: trackById">
+          <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge" [class.badge--income]="transaction.type === 'income'" [class.badge--expense]="transaction.type === 'expense'">
+              {{ transaction.type === 'income' ? 'Ingreso' : 'Gasto' }}
+            </span>
+          </td>
+          <td>{{ transaction.category }}</td>
+          <td>{{ transaction.account }}</td>
+          <td>{{ transaction.description || '—' }}</td>
+          <td class="amount" [class.positive]="transaction.type === 'income'" [class.negative]="transaction.type === 'expense'">
+            {{ transaction.amount | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}
+          </td>
+          <td class="actions">
+            <button type="button" class="link" (click)="remove.emit(transaction.id)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+      </table>
+    </div>
+  } @else {
+    <p class="empty">No hay movimientos registrados aún.</p>
+  }
+</article>

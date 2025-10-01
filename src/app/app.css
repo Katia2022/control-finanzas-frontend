@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7f8ff 0%, #ffffff 60%);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #1f2933;
+}
+
+.layout {
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 4rem;
+  max-width: 1160px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.grid--two { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+@media (max-width: 720px) {
+  .layout { padding: 2.5rem 1rem 3rem; }
+}
+
+/* Simple top navigation */
+.topnav { display: flex; align-items: center; justify-content: center; }
+.tabs { display: flex; gap: .5rem; flex-wrap: wrap; }
+.tab {
+  padding: .6rem 1rem;
+  border-radius: .6rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  transition: all .15s ease-in-out;
+}
+.tab:hover { background: #f9fafb; }
+.tab.active, a.tab.active { background: #111827; color: #fff; border-color: #111827; }
+.view { display: flex; flex-direction: column; gap: 2rem; }

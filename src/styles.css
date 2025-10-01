@@ -1,0 +1,26 @@
+/* Global shared styles */
+
+/* Card container pattern shared across components */
+.card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 20px 40px -36px rgba(31, 41, 51, 0.6);
+}
+
+.card__header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.card__header p {
+  margin: 0.5rem 0 0;
+  color: #6b7280;
+}
+
+@media (max-width: 720px) {
+  .card { padding: 1.75rem; }
+}

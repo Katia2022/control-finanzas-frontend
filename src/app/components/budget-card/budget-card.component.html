@@ -1,0 +1,87 @@
+<article class="card">
+  <header class="card__header">
+    <h2>Presupuesto</h2>
+    <p>Planifica gastos fijos y por categoría (mensual).</p>
+  </header>
+
+  <section class="card__section">
+    <h3>Resumen mensual</h3>
+    <div class="summary">
+      <div>
+        <small>Presupuesto total</small>
+        <strong>{{ totalBudget() | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+      <div>
+        <small>Gastado</small>
+        <strong>{{ totalSpentThisMonth() | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+      <div [class.negative]="totalSpentThisMonth() > totalBudget()">
+        <small>Restante</small>
+        <strong>{{ (totalBudget() - totalSpentThisMonth()) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+    </div>
+    <div class="progress">
+      <div class="bar" [style.width.%]="percentSpent()"></div>
+    </div>
+  </section>
+
+  <section class="card__section">
+    <h3>Gastos fijos</h3>
+    <form class="row-add" [formGroup]="fixedForm" (ngSubmit)="addFixed()">
+      <input type="text" placeholder="Nombre" formControlName="name" />
+      <input type="number" placeholder="Monto" min="0" step="1" formControlName="amount" />
+      <select formControlName="category">
+        <option value="">(sin categoría)</option>
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+      <button class="button" type="submit">Añadir</button>
+    </form>
+    @if (fixedForm.touched && fixedForm.invalid) {
+      <div class="errors">
+        @if (fixedForm.get('name')?.touched && fixedForm.get('name')?.invalid) {
+          <small>Nombre requerido (máx. 40).</small>
+        }
+        @if (fixedForm.get('amount')?.touched && fixedForm.get('amount')?.invalid) {
+          <small>Monto requerido, mínimo 0.</small>
+        }
+      </div>
+    }
+    <ul class="list">
+      <li *ngFor="let fx of fixedExpenses()">
+        <span>{{ fx.name }}</span>
+        <strong>{{ fx.amount | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+        <select [value]="fx.category || ''" (change)="updateFixedCategory(fx.id, ($any($event.target)).value)">
+          <option value="">(sin categoría)</option>
+          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+        </select>
+        <button class="link danger" type="button" (click)="removeFixed(fx.id)">Eliminar</button>
+      </li>
+    </ul>
+  </section>
+
+  <section class="card__section">
+    <h3>Presupuesto por categoría (mes actual)</h3>
+    <ul class="list list-cat">
+      <li *ngFor="let cat of categories">
+        <span class="name">{{ cat }}</span>
+        <div class="budget-input">
+          <input type="number" min="0" step="1"
+                 [value]="getBudget(cat)"
+                 (input)="updateCategoryBudget(cat, ($any($event.target)).valueAsNumber)" />
+          <small>Presupuesto</small>
+        </div>
+        <div class="spent">
+          <strong>{{ getSpent(cat) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+          <small>Gastado</small>
+        </div>
+        <div class="remaining" [class.negative]="getBudget(cat) - getSpent(cat) < 0">
+          <strong>{{ (getBudget(cat) - getSpent(cat)) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+          <small>Restante</small>
+        </div>
+        @if (getBudget(cat) != null) {
+          <button class="link" type="button" (click)="removeCategoryBudget(cat)">Quitar</button>
+        }
+      </li>
+    </ul>
+  </section>
+</article>
