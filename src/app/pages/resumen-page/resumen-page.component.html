@@ -1,0 +1,36 @@
+<section class="view">
+  <app-hero-balance
+    [balance]="tx.balance()"
+    [totalIncome]="tx.totalIncome()"
+    [totalExpense]="tx.totalExpense()"
+    [savingsRate]="tx.savingsRate()"
+    [currencyCode]="tx.currencyCode()"
+  />
+
+  <!-- Resúmenes por categoría y por cuenta -->
+  <section class="grid grid--two">
+    <app-account-summary
+      [accountTotals]="tx.accountTotals()"
+      [currencyCode]="tx.currencyCode()"
+    />
+    <app-category-summary
+      [expenseByCategory]="tx.expenseByCategory()"
+      [currencyCode]="tx.currencyCode()"
+    />
+  </section>
+
+  <!-- Resumen mensual y consejo -->
+  <section class="grid grid--two">
+    <app-monthly-summary
+      [monthlySummaries]="tx.monthlySummaries()"
+      [expenseByCategory]="tx.expenseByCategory()"
+      [currencyCode]="tx.currencyCode()"
+    />
+
+    <app-insight-card
+      [insight]="tx.insight()"
+      [topMonthLabel]="tx.monthlySummaries().length ? tx.monthlySummaries()[0].label : null"
+      [topExpenseCategory]="tx.expenseByCategory().length ? tx.expenseByCategory()[0].category : null"
+    />
+  </section>
+</section>

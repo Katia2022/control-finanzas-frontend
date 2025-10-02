@@ -1,0 +1,144 @@
+<section class="view savings">
+  <header class="savings__header">
+    <h2>Ahorro del mes {{ monthKey() }}</h2>
+    <p *ngIf="loading()">Cargando…</p>
+    <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
+    <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
+    <div class="kpis">
+      <div>
+        <span class="label">Ingresos del mes</span>
+        <strong>{{ incomeThisMonth() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+      <div>
+        <span class="label">Ahorro planeado</span>
+        <strong>{{ plannedThisMonth() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+      <div>
+        <span class="label">Ahorro ejecutado</span>
+        <strong>{{ executedThisMonth() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+      <div>
+        <span class="label">Disponible para gastos</span>
+        <strong>{{ availableForExpenses() | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</strong>
+      </div>
+    </div>
+  </header>
+
+  <section class="card">
+    <h3>Nuevo plan de ahorro</h3>
+    <form [formGroup]="createForm" (ngSubmit)="addPlan()" class="grid">
+      <label>
+        <span>Nombre</span>
+        <input formControlName="name" placeholder="p.ej. Ahorro 10%" />
+      </label>
+      <label>
+        <span>Tipo</span>
+        <select formControlName="type">
+          <option value="fixed">Monto fijo</option>
+          <option value="percent">Porcentaje de ingresos</option>
+        </select>
+      </label>
+      <label *ngIf="createForm.value.type === 'fixed'">
+        <span>Monto</span>
+        <input type="number" min="0" step="0.01" formControlName="amountPlanned" />
+      </label>
+      <label *ngIf="createForm.value.type === 'percent'">
+        <span>Porcentaje (0 a 1)</span>
+        <input type="number" min="0" max="1" step="0.01" formControlName="percent" />
+      </label>
+      <label>
+        <span>Prioridad</span>
+        <input type="number" min="1" step="1" formControlName="priority" />
+      </label>
+      <label>
+        <span>Cuenta origen (Operativa)</span>
+        <select formControlName="sourceAccountId">
+          <option [ngValue]="null">—</option>
+          <option *ngFor="let a of operativas()" [ngValue]="a.id">{{ a.name }} (Operativa)</option>
+        </select>
+      </label>
+      <label>
+        <span>Cuenta destino (Ahorro)</span>
+        <select formControlName="targetAccountId">
+          <option [ngValue]="null">—</option>
+          <option *ngFor="let a of ahorro()" [ngValue]="a.id">{{ a.name }} (Ahorro)</option>
+        </select>
+      </label>
+      <div class="actions">
+        <button type="submit">Agregar plan</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card__header">
+      <h3>Planes activos del mes</h3>
+      <button (click)="scheduleMoves()">Generar movimientos del mes</button>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Monto/Pct</th>
+          <th>Prioridad</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of plans() | slice:0:100">
+          <td>{{ p.name }}</td>
+          <td>{{ p.type === 'FIXED' ? 'Fijo' : 'Porcentaje' }}</td>
+          <td>
+            <ng-container *ngIf="p.type === 'FIXED'; else pct">{{ p.amountPlanned | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</ng-container>
+            <ng-template #pct>{{ (p.percent || 0) * 100 | number: '1.0-1' }}%</ng-template>
+          </td>
+          <td>{{ p.priority }}</td>
+          <td>{{ accountName(p.sourceAccountId) }}</td>
+          <td>{{ accountName(p.targetAccountId) }}</td>
+          <td>{{ p.status === 'ACTIVE' ? 'Activo' : 'Pausado' }}</td>
+          <td class="row-actions">
+            <button *ngIf="p.status === 'ACTIVE'" (click)="pausePlan(p.id)">Pausar</button>
+            <button *ngIf="p.status === 'PAUSED'" (click)="resumePlan(p.id)">Reanudar</button>
+            <button class="danger" (click)="removePlan(p.id)">Eliminar</button>
+          </td>
+        </tr>
+        <tr *ngIf="plans().length === 0">
+          <td colspan="6" class="empty">Aún no hay planes para este mes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h3>Movimientos del mes</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Plan</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of moves() | slice:0:200">
+          <td>{{ m.date }}</td>
+          <td>{{ planName(m.planId) }}</td>
+          <td>{{ m.amount | currency: tx.currencyCode() : 'symbol-narrow' : '1.0-0' }}</td>
+          <td>{{ m.status }}</td>
+          <td class="row-actions">
+            <button *ngIf="m.status !== 'DONE'" (click)="markDone(m.id)">Marcar hecho</button>
+          </td>
+        </tr>
+        <tr *ngIf="moves().length === 0">
+          <td colspan="5" class="empty">Sin movimientos programados este mes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>

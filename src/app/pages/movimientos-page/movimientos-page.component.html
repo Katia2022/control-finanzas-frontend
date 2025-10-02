@@ -1,0 +1,25 @@
+<section class="grid">
+  <div class="full-width">
+    <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
+    <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
+  </div>
+  <div class="full-width">
+    <app-transaction-form
+    [form]="form"
+    [categories]="categoriesSvc.categories()"
+    [accounts]="accountsSvc.accounts()"
+    [fixedNames]="fixedNamesForSelectedCategory"
+    (submitted)="submit()"
+    />
+  </div>
+
+  <div class="full-width">
+    <app-transactions-table
+      [transactions]="filteredTransactions"
+      [currencyCode]="tx.currencyCode()"
+      [accounts]="accountsSvc.accounts()"
+      [filterControl]="filterAccount"
+      (remove)="tx.removeTransaction($event)"
+    />
+  </div>
+</section>

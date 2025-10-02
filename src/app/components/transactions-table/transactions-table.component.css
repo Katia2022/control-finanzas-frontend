@@ -1,0 +1,44 @@
+/* Uses shared .card and .card__header styles from src/styles.css */
+
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 560px; }
+thead { text-align: left; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; }
+thead th { padding: 0.75rem 0.5rem; }
+tbody td { padding: 0.85rem 0.5rem; border-top: 1px solid #e5e7eb; vertical-align: middle; }
+
+.badge { display: inline-flex; align-items: center; font-weight: 600; font-size: 0.75rem; padding: 0.2rem 0.75rem; border-radius: 999px; background: #e5e7eb; color: #1f2933; }
+.badge--income { background: rgba(34, 197, 94, 0.18); color: #047857; }
+.badge--expense { background: rgba(239, 68, 68, 0.16); color: #b91c1c; }
+
+.amount { text-align: right; font-variant-numeric: tabular-nums; }
+.amount.positive { color: #047857; }
+.amount.negative { color: #dc2626; }
+
+.actions { text-align: right; }
+.link { background: none; border: none; color: #2563eb; cursor: pointer; font-weight: 600; padding: 0; }
+.link:hover { text-decoration: underline; }
+.empty { margin: 0; color: #6b7280; }
+
+@media (max-width: 720px) { table { min-width: 480px; } }
+
+/* Header + filter layout */
+.card__header .header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.table-filter .filter-label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.table-filter input {
+  min-width: 200px;
+}
+
+@media (max-width: 600px) {
+  .card__header .header-top { flex-direction: column; align-items: stretch; }
+}

@@ -1,0 +1,16 @@
+<article class="card summaries-card">
+  <header class="card__header">
+    <h2>Gasto por categoría</h2>
+    <p>Principales categorías de gasto.</p>
+  </header>
+  @if (expenseByCategory.length) {
+    <ul class="category-list">
+      <li *ngFor="let item of expenseByCategory">
+        <span>{{ item.category }}</span>
+        <strong>{{ item.amount | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+      </li>
+    </ul>
+  } @else {
+    <p class="empty">Aún no registras gastos.</p>
+  }
+</article>

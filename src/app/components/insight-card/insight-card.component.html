@@ -1,0 +1,16 @@
+<article class="card insight-card">
+  <ul class="highlights">
+    <li>
+      <span class="highlights__label">Mes con mayor ingreso</span>
+      <strong>
+        {{ topMonthLabel || 'Sin registros' }}
+      </strong>
+    </li>
+    <li>
+      <span class="highlights__label">Categoría con más gasto</span>
+      <strong>{{ topExpenseCategory || 'Sin datos' }}</strong>
+    </li>
+  </ul>
+  <p class="insight">{{ insight }}</p>
+</article>
+

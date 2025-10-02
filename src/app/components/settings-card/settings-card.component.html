@@ -1,0 +1,30 @@
+<article class="card">
+  <header class="card__header">
+    <h2>Configuración</h2>
+    <p>Ajusta reglas del panel.</p>
+  </header>
+
+  
+
+  <div class="row">
+    <label>
+      <span>Día de inicio del mes contable</span>
+      <input type="number" [value]="settingsSvc.settings().monthCutoffDay" min="1" max="31" step="1"
+             (input)="settingsSvc.setMonthCutoffDay(($any($event.target)).valueAsNumber)" />
+    </label>
+  </div>
+
+  
+
+  <!-- Selector de moneda oculto por ahora; se conserva la lógica en servicio -->
+
+  <div class="row">
+    <label>
+      <span>Swagger (documentación de la API)</span>
+      <div>
+        <a class="button" href="http://localhost:8080/swagger-ui" target="_blank" rel="noopener">Abrir Swagger UI</a>
+        <a class="button" href="http://localhost:8080/api/v1/openapi" target="_blank" rel="noopener">Ver OpenAPI JSON</a>
+      </div>
+    </label>
+  </div>
+</article>

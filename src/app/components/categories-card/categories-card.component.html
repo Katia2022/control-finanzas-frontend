@@ -1,0 +1,37 @@
+<article class="card">
+  <header class="card__header">
+    <h2>Categorías</h2>
+    <p>Gestiona las categorías disponibles.</p>
+  </header>
+
+  <div class="messages">
+    <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
+    <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
+  </div>
+
+  <form class="row-add" (ngSubmit)="add()">
+    <input type="text" [formControl]="newCatCtrl" placeholder="Nueva categoría" />
+    <button type="submit" class="button">Añadir</button>
+  </form>
+  @if (newCatCtrl.touched && newCatCtrl.invalid) {
+    <small class="error">Nombre requerido (máx. 40).</small>
+  }
+
+  <ul class="list">
+    <li *ngFor="let cat of categories()">
+      @if (editing() !== cat) {
+        <span class="name">{{ cat }}</span>
+        <div class="actions">
+          <button class="link" type="button" (click)="startEdit(cat)">Editar</button>
+          <button class="link danger" type="button" (click)="remove(cat)">Eliminar</button>
+        </div>
+      } @else {
+        <input type="text" [formControl]="editCtrl" />
+        <div class="actions">
+          <button class="link" type="button" (click)="saveEdit()">Guardar</button>
+          <button class="link" type="button" (click)="cancelEdit()">Cancelar</button>
+        </div>
+      }
+    </li>
+  </ul>
+</article>
