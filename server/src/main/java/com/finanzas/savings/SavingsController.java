@@ -1,6 +1,5 @@
 package com.finanzas.savings;
 
-import com.finanzas.accounts.AccountRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +16,9 @@ public class SavingsController {
     private final SavingsPlanRepository planRepo;
     private final SavingsMoveRepository moveRepo;
     private final SavingsService service;
-    private final AccountRepository accountRepo;
 
-    public SavingsController(SavingsPlanRepository planRepo, SavingsMoveRepository moveRepo, SavingsService service, AccountRepository accountRepo) {
-        this.planRepo = planRepo; this.moveRepo = moveRepo; this.service = service; this.accountRepo = accountRepo;
+    public SavingsController(SavingsPlanRepository planRepo, SavingsMoveRepository moveRepo, SavingsService service) {
+        this.planRepo = planRepo; this.moveRepo = moveRepo; this.service = service;
     }
 
     // Plans

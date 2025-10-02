@@ -12,6 +12,7 @@
     <java.version>17</java.version>
     <spring.boot.version>3.3.3</spring.boot.version>
     <springdoc.version>2.5.0</springdoc.version>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
   </properties>
 
   <dependencyManagement>

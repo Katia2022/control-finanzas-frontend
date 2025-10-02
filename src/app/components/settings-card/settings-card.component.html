@@ -4,17 +4,17 @@
     <p>Ajusta reglas del panel.</p>
   </header>
 
+  
+
   <div class="row">
     <label>
-      <span>Regla de ahorro mínimo (%)</span>
-      <input type="number" [value]="percent()" min="0" max="100" step="1"
-             (input)="onPercentChange(($any($event.target)).valueAsNumber)" />
+      <span>Día de inicio del mes contable</span>
+      <input type="number" [value]="settingsSvc.settings().monthCutoffDay" min="1" max="31" step="1"
+             (input)="settingsSvc.setMonthCutoffDay(($any($event.target)).valueAsNumber)" />
     </label>
-    <input class="range" type="range" [value]="percent()" min="0" max="50" step="1"
-           (input)="onPercentChange(($any($event.target)).valueAsNumber)" />
   </div>
 
-  <p class="note">Consejo se activa si tu tasa de ahorro actual es menor a este porcentaje.</p>
+  
 
   <!-- Selector de moneda oculto por ahora; se conserva la lógica en servicio -->
 

@@ -1,0 +1,141 @@
+{
+  "info": {
+    "name": "Control Finanzas - Backend API",
+    "_postman_id": "5d9f6d4e-7c8a-4f5d-9f22-collection-local",
+    "description": "Colección para probar los flujos del backend (Spring Boot). Usa la variable `base_url` para apuntar al entorno.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "GET /settings",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/settings", "host": ["{{base_url}}"], "path": ["settings"] }
+          }
+        },
+        {
+          "name": "PATCH /settings",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"savingsMinRate\": 0.2,\n  \"currencyCode\": \"MXN\",\n  \"monthCutoffDay\": 26\n}"
+            },
+            "url": { "raw": "{{base_url}}/settings", "host": ["{{base_url}}"], "path": ["settings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        { "name": "GET /accounts", "request": { "method": "GET", "url": { "raw": "{{base_url}}/accounts", "host": ["{{base_url}}"], "path": ["accounts"] } } },
+        { "name": "POST /accounts",
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cuenta Principal\",\n  \"initialBalance\": 1000,\n  \"type\": \"CASH\"\n}" },
+            "url": { "raw": "{{base_url}}/accounts", "host": ["{{base_url}}"], "path": ["accounts"] } } },
+        { "name": "PATCH /accounts/{id}",
+          "request": { "method": "PATCH", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cuenta Editada\",\n  \"initialBalance\": 1500,\n  \"type\": \"BANK\"\n}" },
+            "url": { "raw": "{{base_url}}/accounts/:id", "host": ["{{base_url}}"], "path": ["accounts", ":id"], "variable": [{"key":"id","value":"1"}] } } },
+        { "name": "DELETE /accounts/{id}",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/accounts/:id", "host": ["{{base_url}}"], "path": ["accounts", ":id"], "variable": [{"key":"id","value":"1"}] } } }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        { "name": "GET /categories", "request": { "method": "GET", "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] } } },
+        { "name": "POST /categories",
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Alimentos\"\n}" },
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] } } },
+        { "name": "PATCH /categories/{id}",
+          "request": { "method": "PATCH", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Comida\"\n}" },
+            "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{"key":"id","value":"1"}] } } },
+        { "name": "DELETE /categories/{id}",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{"key":"id","value":"1"}] } } }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        { "name": "GET /transactions (all)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/transactions", "host": ["{{base_url}}"], "path": ["transactions"] } } },
+        { "name": "GET /transactions?monthKey=YYYY-MM", "request": { "method": "GET", "url": { "raw": "{{base_url}}/transactions?monthKey=2025-01", "host": ["{{base_url}}"], "path": ["transactions"], "query": [{"key":"monthKey","value":"2025-01"}] } } },
+        { "name": "POST /transactions",
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"EXPENSE\",\n  \"accountId\": 1,\n  \"categoryId\": 1,\n  \"amount\": 250.5,\n  \"date\": \"2025-01-10\",\n  \"description\": \"Supermercado\"\n}" },
+            "url": { "raw": "{{base_url}}/transactions", "host": ["{{base_url}}"], "path": ["transactions"] } } },
+        { "name": "DELETE /transactions/{id}",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/transactions/:id", "host": ["{{base_url}}"], "path": ["transactions", ":id"], "variable": [{"key":"id","value":"1"}] } } }
+      ]
+    },
+    {
+      "name": "Fixed Expenses",
+      "item": [
+        { "name": "GET /fixed-expenses", "request": { "method": "GET", "url": { "raw": "{{base_url}}/fixed-expenses", "host": ["{{base_url}}"], "path": ["fixed-expenses"] } } },
+        { "name": "POST /fixed-expenses",
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Renta\",\n  \"amount\": 9000,\n  \"categoryId\": 1\n}" },
+            "url": { "raw": "{{base_url}}/fixed-expenses", "host": ["{{base_url}}"], "path": ["fixed-expenses"] } } },
+        { "name": "PATCH /fixed-expenses/{id}",
+          "request": { "method": "PATCH", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Renta Dept.\",\n  \"amount\": 9500,\n  \"categoryId\": 1\n}" },
+            "url": { "raw": "{{base_url}}/fixed-expenses/:id", "host": ["{{base_url}}"], "path": ["fixed-expenses", ":id"], "variable": [{"key":"id","value":"1"}] } } },
+        { "name": "DELETE /fixed-expenses/{id}",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/fixed-expenses/:id", "host": ["{{base_url}}"], "path": ["fixed-expenses", ":id"], "variable": [{"key":"id","value":"1"}] } } }
+      ]
+    },
+    {
+      "name": "Budgets (Categories)",
+      "item": [
+        { "name": "GET /budgets/categories",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/budgets/categories", "host": ["{{base_url}}"], "path": ["budgets","categories"] } } },
+        { "name": "GET /budgets/categories?monthKey=YYYY-MM",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/budgets/categories?monthKey=2025-01", "host": ["{{base_url}}"], "path": ["budgets","categories"], "query": [{"key":"monthKey","value":"2025-01"}] } } },
+        { "name": "PUT /budgets/categories/{categoryId}",
+          "request": { "method": "PUT", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"categoryId\": 1,\n  \"monthKey\": \"2025-01\",\n  \"amount\": 3000\n}" },
+            "url": { "raw": "{{base_url}}/budgets/categories/:categoryId", "host": ["{{base_url}}"], "path": ["budgets","categories", ":categoryId"], "variable": [{"key":"categoryId","value":"1"}] } } },
+        { "name": "DELETE /budgets/categories/{id}",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/budgets/categories/:id", "host": ["{{base_url}}"], "path": ["budgets","categories", ":id"], "variable": [{"key":"id","value":"1"}] } } }
+      ]
+    },
+    {
+      "name": "Savings",
+      "item": [
+        { "name": "GET /savings/plans",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/savings/plans", "host": ["{{base_url}}"], "path": ["savings","plans"] } } },
+        { "name": "GET /savings/plans?monthKey=YYYY-MM",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/savings/plans?monthKey=2025-01", "host": ["{{base_url}}"], "path": ["savings","plans"], "query": [{"key":"monthKey","value":"2025-01"}] } } },
+        { "name": "POST /savings/plans",
+          "request": { "method": "POST", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Fondo Emergencia\",\n  \"monthKey\": \"2025-01\",\n  \"targetAmount\": 5000,\n  \"priority\": 1,\n  \"accountId\": 1\n}" },
+            "url": { "raw": "{{base_url}}/savings/plans", "host": ["{{base_url}}"], "path": ["savings","plans"] } } },
+        { "name": "PATCH /savings/plans/{id}",
+          "request": { "method": "PATCH", "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Fondo Emergencia\",\n  \"targetAmount\": 6000,\n  \"priority\": 2\n}" },
+            "url": { "raw": "{{base_url}}/savings/plans/:id", "host": ["{{base_url}}"], "path": ["savings","plans", ":id"], "variable": [{"key":"id","value":"1"}] } } },
+        { "name": "DELETE /savings/plans/{id}",
+          "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/savings/plans/:id", "host": ["{{base_url}}"], "path": ["savings","plans", ":id"], "variable": [{"key":"id","value":"1"}] } } },
+
+        { "name": "GET /savings/moves",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/savings/moves", "host": ["{{base_url}}"], "path": ["savings","moves"] } } },
+        { "name": "GET /savings/moves?monthKey=YYYY-MM",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/savings/moves?monthKey=2025-01", "host": ["{{base_url}}"], "path": ["savings","moves"], "query": [{"key":"monthKey","value":"2025-01"}] } } },
+        { "name": "POST /savings/moves/schedule",
+          "request": { "method": "POST", "url": { "raw": "{{base_url}}/savings/moves/schedule?monthKey=2025-01&totalIncome=20000", "host": ["{{base_url}}"], "path": ["savings","moves","schedule"], "query": [{"key":"monthKey","value":"2025-01"},{"key":"totalIncome","value":"20000"}] } } },
+        { "name": "POST /savings/moves/{id}/done",
+          "request": { "method": "POST", "url": { "raw": "{{base_url}}/savings/moves/:id/done", "host": ["{{base_url}}"], "path": ["savings","moves", ":id", "done"], "variable": [{"key":"id","value":"1"}] } } }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080/api/v1" }
+  ]
+}

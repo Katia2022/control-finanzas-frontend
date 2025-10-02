@@ -308,8 +308,8 @@ export class TransactionsService {
 
   private fromDto(dto: TransactionDTO): Transaction {
     // Map ids back to names using known maps; if missing, use string ids as fallback
-    const accountName = [...this.accIdByName.entries()].find(([name, id]) => id === dto.accountId)?.[0] || String(dto.accountId);
-    const categoryName = [...this.catIdByName.entries()].find(([name, id]) => id === dto.categoryId)?.[0] || String(dto.categoryId);
+    const accountName = dto.accountName || [...this.accIdByName.entries()].find(([name, id]) => id === dto.accountId)?.[0] || String(dto.accountId);
+    const categoryName = dto.categoryName || [...this.catIdByName.entries()].find(([name, id]) => id === dto.categoryId)?.[0] || String(dto.categoryId);
     return {
       id: dto.id,
       type: dto.type === 'INCOME' ? 'income' : 'expense',

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { API_BASE_URL } from './api.config';
 
-export interface AppSettingsDTO { savingsMinRate: number; currencyCode?: 'MXN' | 'USD' | 'EUR'; }
+export interface AppSettingsDTO { savingsMinRate: number; currencyCode?: 'MXN' | 'USD' | 'EUR'; monthCutoffDay?: number; }
 
 @Injectable({ providedIn: 'root' })
 export class SettingsApi {

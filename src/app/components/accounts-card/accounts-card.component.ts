@@ -102,7 +102,7 @@ export class AccountsCardComponent implements OnInit {
 
   remove(name: string) {
     this.accountsSvc.remove(name);
-    this.refreshFromServer();
+  //  this.refreshFromServer();
   }
 
   initialOf(name: string): number { return this.accountsSvc.getInitial(name); }

@@ -21,7 +21,7 @@ public class FixedExpenseController {
     public static class UpdateBody { public String name; public Double amount; public Long categoryId; }
 
     @GetMapping
-    public List<FixedExpense> list() { return repo.findAll(); }
+    public List<FixedExpenseDto.View> list() { return repo.findAll().stream().map(FixedExpenseDto::toView).toList(); }
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody CreateBody body) {
@@ -30,7 +30,7 @@ public class FixedExpenseController {
         f.setAmount(java.math.BigDecimal.valueOf(body.amount));
         if (body.categoryId != null) f.setCategory(categoryRepo.findById(body.categoryId).orElse(null));
         repo.save(f);
-        return ResponseEntity.created(URI.create("/api/v1/fixed-expenses/" + f.getId())).body(f);
+        return ResponseEntity.created(URI.create("/api/v1/fixed-expenses/" + f.getId())).body(FixedExpenseDto.toView(f));
     }
 
     @PatchMapping("/{id}")
@@ -40,7 +40,7 @@ public class FixedExpenseController {
             if (body.amount != null) f.setAmount(java.math.BigDecimal.valueOf(body.amount));
             if (body.categoryId != null) f.setCategory(categoryRepo.findById(body.categoryId).orElse(null));
             repo.save(f);
-            return ResponseEntity.ok(f);
+            return ResponseEntity.ok(FixedExpenseDto.toView(f));
         }).orElseGet(() -> ResponseEntity.status(404).body(problem(404, "Not found")));
     }
 
@@ -53,4 +53,3 @@ public class FixedExpenseController {
     private static Problem problem(int status, String title) { var p = new Problem(); p.status = status; p.title = title; return p; }
     static class Problem { public String type; public String title; public Integer status; public String detail; public String instance; }
 }
-

@@ -19,9 +19,10 @@ public class TransactionController {
     private final TransactionRepository repo;
     private final AccountRepository accountRepo;
     private final CategoryRepository categoryRepo;
+    private final com.finanzas.settings.SettingRepository settingRepo;
 
-    public TransactionController(TransactionRepository repo, AccountRepository accountRepo, CategoryRepository categoryRepo) {
-        this.repo = repo; this.accountRepo = accountRepo; this.categoryRepo = categoryRepo;
+    public TransactionController(TransactionRepository repo, AccountRepository accountRepo, CategoryRepository categoryRepo, com.finanzas.settings.SettingRepository settingRepo) {
+        this.repo = repo; this.accountRepo = accountRepo; this.categoryRepo = categoryRepo; this.settingRepo = settingRepo;
     }
 
     public static class CreateBody {
@@ -34,10 +35,25 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<Transaction> list(@RequestParam(required = false) String monthKey) {
-        if (monthKey == null) return repo.findAll();
+    public List<TransactionDto.View> list(@RequestParam(required = false) String monthKey) {
+        if (monthKey == null) return repo.findAll().stream().map(TransactionDto::toView).toList();
         YearMonth ym = YearMonth.parse(monthKey);
-        return repo.findByDateBetween(ym.atDay(1), ym.atEndOfMonth());
+        int cutoff = settingRepo.findById("monthCutoffDay").map(s -> parseInt(s.getValueJson(), 1)).orElse(1);
+        LocalDate start;
+        LocalDate end;
+        if (cutoff <= 1) {
+            start = ym.atDay(1);
+            end = ym.atEndOfMonth();
+        } else {
+            YearMonth prev = ym.minusMonths(1);
+            int prevDay = Math.min(cutoff, prev.lengthOfMonth());
+            int currDay = Math.min(cutoff, ym.lengthOfMonth());
+            LocalDate prevCutoff = LocalDate.of(prev.getYear(), prev.getMonth(), prevDay);
+            LocalDate currCutoff = LocalDate.of(ym.getYear(), ym.getMonth(), currDay);
+            start = prevCutoff;
+            end = currCutoff.minusDays(1);
+        }
+        return repo.findByDateBetween(start, end).stream().map(TransactionDto::toView).toList();
     }
 
     @PostMapping
@@ -50,7 +66,7 @@ public class TransactionController {
         t.setDate(LocalDate.parse(body.date));
         t.setDescription(body.description);
         repo.save(t);
-        return ResponseEntity.created(URI.create("/api/v1/transactions/" + t.getId())).body(t);
+        return ResponseEntity.created(URI.create("/api/v1/transactions/" + t.getId())).body(TransactionDto.toView(t));
     }
 
     @DeleteMapping("/{id}")
@@ -61,5 +77,8 @@ public class TransactionController {
 
     private static Problem problem(int status, String title) { var p = new Problem(); p.status = status; p.title = title; return p; }
     static class Problem { public String type; public String title; public Integer status; public String detail; public String instance; }
-}
 
+    private static int parseInt(String s, int def) {
+        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+    }
+}

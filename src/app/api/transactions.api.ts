@@ -5,6 +5,7 @@ import { API_BASE_URL } from './api.config';
 export type TxType = 'INCOME' | 'EXPENSE';
 export interface TransactionDTO {
   id: number; type: TxType; accountId: number; categoryId: number;
+  accountName?: string; categoryName?: string;
   amount: number; date: string; description?: string;
 }
 export interface TransactionCreateDTO {
@@ -26,4 +27,3 @@ export class TransactionsApi {
   }
   delete(id: number) { return this.http.delete<void>(`${this.base}/transactions/${id}`); }
 }
-
