@@ -1,0 +1,34 @@
+<section class="view">
+  <article class="savings-banner" *ngIf="plannedSavingsThisMonth() > 0">
+    <div>
+      <h3>Ahorro planeado este mes</h3>
+      <p>
+        Planeado:
+        <strong>{{
+          plannedSavingsThisMonth()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+        · Ingresos:
+        <strong>{{
+          incomeThisMonth()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+        · Disponible para gastos:
+        <strong>{{
+          availableForExpenses()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </p>
+      <a routerLink="/ahorro" class="link">Gestionar ahorro</a>
+    </div>
+  </article>
+  <app-budget-card
+    [categories]="categoryNames"
+    [transactions]="operatingExpenseTx()"
+    [currencyCode]="transactionService.currencyCode()"
+    [monthKey]="transactionService.currentMonthKey()"
+    [periodStart]="transactionService.periodStart()"
+    [periodEnd]="transactionService.periodEnd()"
+    [planningCap]="planningCap()"
+  />
+</section>

@@ -1,0 +1,5 @@
+.grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.full-width { grid-column: 1 / -1; }
+/* Pull page up a bit to reduce whitespace under top nav */
+:host { display: block; margin-top: -1.5rem; }
+.toolbar { margin-bottom: .25rem; }

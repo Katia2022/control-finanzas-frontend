@@ -1,0 +1,11 @@
+.import__controls { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.import__controls input[type=file] { width: 220px; }
+.import__controls .p-select { width: 220px; }
+.import__controls .p-button { white-space: nowrap; }
+.hint { color: #6b7280; margin: .25rem 0 0; }
+/* inline error/info removed; using toasts */
+
+.preview { margin-top: .75rem; overflow-x: auto; }
+.preview table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.preview th, .preview td { padding: .25rem .5rem; border-top: 1px solid #e5e7eb; text-align: left; }
+.preview .amount { text-align: right; font-variant-numeric: tabular-nums; }

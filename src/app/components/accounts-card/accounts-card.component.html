@@ -1,54 +1,157 @@
-<article class="card">
-  <header class="card__header">
-    <h2>Cuentas</h2>
-    <p>Gestiona las cuentas disponibles.</p>
-  </header>
-
+<p-card header="Cuentas" subheader="Gestiona las cuentas disponibles.">
   <form class="row-add" (ngSubmit)="add()">
-    <div class="messages">
-      <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
-      <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
-    </div>
-    <input type="text" [formControl]="newAccCtrl" placeholder="Nueva cuenta" />
-    <select [formControl]="newAccType" title="Tipo">
-      <option value="OPERATIVA">Operativa</option>
-      <option value="AHORRO">Ahorro</option>
-    </select>
-    <button type="submit" class="button">Añadir</button>
+    <input pInputText type="text" [formControl]="newAccCtrl" placeholder="Nueva cuenta" />
+    <p-select
+      [formControl]="newAccType"
+      [options]="[
+        { label: 'Operativa', value: 'OPERATIVA' },
+        { label: 'Ahorro', value: 'AHORRO' }
+      ]"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Tipo"
+    ></p-select>
+    <button
+      pButton
+      type="submit"
+      label="Añadir"
+      icon="pi pi-plus"
+      [disabled]="newAccCtrl.invalid"
+    ></button>
   </form>
   @if (newAccCtrl.touched && newAccCtrl.invalid) {
-    <small class="error">Nombre requerido (máx. 40).</small>
-  }
-  @if (addError()) {
-    <small class="error">{{ addError() }}</small>
+  <small class="error">Nombre requerido (máx. 40).</small>
+  } @if (addError()) {
+  <small class="error">{{ addError() }}</small>
   }
 
-  <ul class="list">
-    <li *ngFor="let acc of accounts()">
-      @if (editing() !== acc) {
-        <span class="name">{{ acc }}</span>
-        @if (typeOf(acc) === 'AHORRO') {
-          <span class="chip chip--ahorro">Ahorro</span>
-        } @else if (typeOf(acc) === 'OPERATIVA') {
-          <span class="chip chip--operativa">Operativa</span>
-        }
-        <div class="actions">
-          <button class="link" type="button" (click)="startEdit(acc)">Editar</button>
-          <button class="link danger" type="button" (click)="remove(acc)">Eliminar</button>
-        </div>
-      } @else {
-        <input type="text" [formControl]="editCtrl" />
-        <div class="actions">
-          <button class="link" type="button" (click)="saveEdit()">Guardar</button>
-          <button class="link" type="button" (click)="cancelEdit()">Cancelar</button>
-        </div>
-      }
-      <div class="initial">
-        <label>
-          <span>Saldo inicial</span>
-          <input type="number" step="0.01" [value]="initialOf(acc)" (change)="updateInitial(acc, ($any($event.target)).valueAsNumber)" />
-        </label>
+  <p-table
+    #dt
+    class="accounts-table"
+    [value]="rows()"
+    [paginator]="false"
+    [globalFilterFields]="['name', 'type', 'initial']"
+  >
+    <ng-template #caption>
+      <div class="table-toolbar">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($event.target.value, 'contains')"
+            placeholder="Buscar"
+          />
+        </span>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-filter-slash"
+          label="Limpiar"
+          (click)="dt.clear()"
+          class="p-button-text"
+        ></button>
       </div>
-    </li>
-  </ul>
-</article>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="name">Cuenta <p-sortIcon field="name"></p-sortIcon></th>
+        <th pSortableColumn="type">Tipo <p-sortIcon field="type"></p-sortIcon></th>
+        <th pSortableColumn="initial">Saldo inicial <p-sortIcon field="initial"></p-sortIcon></th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template #filter>
+      <tr>
+        <th>
+          <p-columnFilter field="name" display="menu"></p-columnFilter>
+        </th>
+        <th>
+          <p-columnFilter
+            field="type"
+            display="menu"
+            [showApplyButton]="false"
+            [showClearButton]="true"
+            type="text"
+          ></p-columnFilter>
+        </th>
+        <th>
+          <p-columnFilter field="initial" display="menu" type="numeric"></p-columnFilter>
+        </th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td>
+          @if (editing() !== row.name) {
+          <span class="name">{{ row.name }}</span>
+          } @else {
+          <input pInputText type="text" [formControl]="editCtrl" />
+          }
+        </td>
+        <td>
+          <p-tag
+            [value]="row.type | accountTypeLabel"
+            [severity]="row.type | accountTypeSeverity"
+          ></p-tag>
+        </td>
+        <td>
+          <div class="initial">
+            <label>
+              <span class="sr-only">Saldo inicial</span>
+              <p-inputNumber
+                [ngModel]="row.initial"
+                [minFractionDigits]="2"
+                [maxFractionDigits]="2"
+                (onInput)="updateInitial(row.name, $event.value != null ? +$event.value : null)"
+              ></p-inputNumber>
+            </label>
+          </div>
+        </td>
+        <td>
+          <div class="actions">
+            @if (editing() !== row.name) {
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              icon="pi pi-pencil"
+              (click)="startEdit(row.name)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              icon="pi pi-trash"
+              severity="danger"
+              (click)="remove(row.name)"
+            ></button>
+            } @else {
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              icon="pi pi-check"
+              (click)="saveEdit()"
+              [disabled]="editCtrl.invalid"
+            ></button>
+            <button
+              pButton
+              type="button"
+              [text]="true"
+              icon="pi pi-times"
+              (click)="cancelEdit()"
+            ></button>
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="4">No hay cuentas para mostrar.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>

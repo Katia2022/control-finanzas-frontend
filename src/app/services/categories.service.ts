@@ -9,9 +9,7 @@ export class CategoriesService {
   readonly lastError = signal<string | null>(null);
   readonly lastInfo = signal<string | null>(null);
 
-  constructor() {
-    this.refresh();
-  }
+  constructor() {}
 
   add(name: string): void {
     const trimmed = name.trim();
@@ -46,11 +44,24 @@ export class CategoriesService {
 
   private update(list: string[]) { this.categories.set(list); }
 
+  ensureLoaded() {
+    // Cargar directamente del backend, evitando stores que invocan inject() fuera de contexto
+    this.api.list().subscribe({
+      next: (list) => {
+        this.lastList = list || [];
+        this.categories.set(this.lastList.map(c => c.name).sort((a, b) => a.localeCompare(b)));
+      },
+      error: () => { this.lastList = []; this.categories.set([]); }
+    });
+  }
+
   private refresh() {
-    this.api.list().subscribe({ next: list => {
-      this.lastList = list || [];
-      this.categories.set(this.lastList.map(c => c.name).sort((a, b) => a.localeCompare(b)));
-      this.lastError.set(null);
-    }, error: () => this.lastError.set('No se pudieron cargar las categorías.') });
+    this.api.list().subscribe({
+      next: (list) => {
+        this.lastList = list || [];
+        this.categories.set(this.lastList.map(c => c.name).sort((a, b) => a.localeCompare(b)));
+      },
+      error: () => {}
+    });
   }
 }

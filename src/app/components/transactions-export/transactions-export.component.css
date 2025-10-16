@@ -1,0 +1,19 @@
+.export-form { display: flex; flex-direction: column; gap: .75rem; }
+.row { display: grid; grid-template-columns: 1fr 1fr auto; gap: .75rem; align-items: end; }
+label { display: flex; flex-direction: column; gap: .35rem; }
+.check-field { display: inline-flex; align-items: center; gap: .5rem; padding-bottom: .25rem; white-space: nowrap; }
+.row label, .row .check-field { max-width: 220px; }
+/* Fix control widths so they don't jump when filled */
+.row label input.p-inputtext { width: 220px; box-sizing: border-box; }
+.row label .p-select { width: 220px; }
+
+@media (max-width: 720px) {
+  .row { grid-template-columns: 1fr; }
+  .row label, .row .check-field { max-width: 100%; }
+  .row label input.p-inputtext, .row label .p-select { width: 100%; }
+}
+.preview { max-height: 260px; overflow: auto; border: 1px solid #e5e7eb; border-radius: 8px; }
+.preview table { width: 100%; border-collapse: collapse; }
+.preview th, .preview td { padding: .4rem .5rem; border-bottom: 1px solid #f3f4f6; }
+.amount { text-align: right; font-variant-numeric: tabular-nums; }
+.actions { display: flex; justify-content: flex-end; }

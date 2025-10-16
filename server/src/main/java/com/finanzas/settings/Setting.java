@@ -1,9 +1,18 @@
 package com.finanzas.settings;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "settings")
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Setting {
     @Id
     @Column(length = 100)
@@ -11,10 +20,4 @@ public class Setting {
 
     @Column(name = "value_json", columnDefinition = "text")
     private String valueJson;
-
-    public String getKey() { return key; }
-    public void setKey(String key) { this.key = key; }
-    public String getValueJson() { return valueJson; }
-    public void setValueJson(String valueJson) { this.valueJson = valueJson; }
 }
-

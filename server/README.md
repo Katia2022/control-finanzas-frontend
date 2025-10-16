@@ -1,4 +1,4 @@
-Control Finanzas - Backend (Spring Boot 3)
+Control Finanzas – Backend (Spring Boot 3)
 
 Requisitos
 - Java 17
@@ -13,15 +13,26 @@ Configuración
   - Flyway habilitado (migraciones en `db/migration`)
 
 Arranque
-```
-mvn spring-boot:run
-```
-La app corre en `http://localhost:8080`.
+- Desde `server/`: `mvn spring-boot:run`
+- La app corre en `http://localhost:8080`
+
+Arquitectura (feature-first)
+- Paquetes por dominio (feature):
+  - `com.finanzas.accounts`
+  - `com.finanzas.categories`
+  - `com.finanzas.transactions`
+  - `com.finanzas.budgets` (incluye budgets y fixed-expenses)
+  - `com.finanzas.savings`
+- Transversales:
+  - `com.finanzas.config` (WebConfig, OpenAPI, GlobalExceptionHandler)
+  - `com.finanzas.common` (excepciones comunes)
+- Patrón por feature: Entidad · Repositorio · Servicio · Controlador · DTOs
+- Errores: el `GlobalExceptionHandler` devuelve Problem JSON (404 NotFound, 409 Conflict, 400 Bad Request)
 
 CORS
-- Habilitado para `http://localhost:4200` bajo el path `/api/**`.
+- Habilitado para `http://localhost:4200` bajo `/api/**` (ver `config/WebConfig`).
 
-Endpoints iniciales
+Endpoints (resumen)
 - Accounts
   - GET `/api/v1/accounts`
   - POST `/api/v1/accounts`
@@ -46,13 +57,7 @@ Endpoints iniciales
   - PATCH `/api/v1/fixed-expenses/{id}`
   - DELETE `/api/v1/fixed-expenses/{id}`
 - Savings
-  - GET `/api/v1/savings/plans?monthKey=yyyy-MM`
-  - POST `/api/v1/savings/plans`
-  - PATCH `/api/v1/savings/plans/{id}`
-  - DELETE `/api/v1/savings/plans/{id}`
-  - GET `/api/v1/savings/moves?monthKey=yyyy-MM`
-  - POST `/api/v1/savings/moves/schedule?monthKey=yyyy-MM&totalIncome=0`
-  - POST `/api/v1/savings/moves/{id}/done`
+  - POST `/api/v1/savings/transfer`
 - Settings
   - GET `/api/v1/settings`
   - PATCH `/api/v1/settings`
@@ -60,13 +65,16 @@ Endpoints iniciales
 Swagger / OpenAPI
 - Swagger UI: `http://localhost:8080/swagger-ui`
 - OpenAPI JSON: `http://localhost:8080/api/v1/openapi`
-- Exportar al frontend: `npm run export:openapi` (backend arriba en 8080)
+- Exportar a `public/openapi.yaml` (requiere backend arriba en 8080):
+  - `mvn -P export-openapi verify`
 
 Migraciones (Flyway)
 - `V1__init.sql` crea tablas base (accounts, categories, transactions, budget_categories, savings_plans, savings_moves, settings)
 - `V2__account_type.sql` agrega `accounts.type`
 - `V3__fixed_expenses.sql` agrega `fixed_expenses`
 
-Siguientes pasos sugeridos
-- Agregar `categories` y `transactions` con operaciones atómicas para “done” de ahorro (gasto en origen + ingreso en destino).
-- Añadir `OpenAPI` autoexpuesto con Springdoc y alinear el contrato con `public/openapi.yaml` del frontend.
+Buenas prácticas
+- Mantener estructura por feature (controller/service/repository/DTO/entity juntos).
+- Validaciones en DTOs de request; lógica en services; controllers solo orquestan.
+- Lanzar `NotFoundException`, `ConflictException` o `IllegalArgumentException`; el handler global formatea la respuesta.
+- Migraciones idempotentes y versionadas en `db/migration`.

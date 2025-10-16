@@ -1,0 +1,302 @@
+﻿<section class="view savings">
+  <p-card>
+    <ng-template #title>Ahorro del mes {{ displayMonthKey() }}</ng-template>
+    <ng-template #subtitle>
+      <span> Periodo: {{ periodStart() }} a {{ periodEnd() }} </span>
+      <i
+        class="pi pi-info-circle"
+        pTooltip="Periodo según el día de corte configurado. Si el día actual es menor al corte, el periodo vigente puede estar etiquetado con el mes anterior. Los datos se consultan para todo el rango mostrado."
+        tooltipPosition="top"
+        style="cursor: help; opacity: 0.8"
+      ></i>
+    </ng-template>
+    @if(loading()) {
+    <p>Cargando…</p>
+    } @if (errorMsg()) {
+    <p>{{ errorMsg() }}</p>
+    } @if (infoMsg()) {
+    <p>{{ infoMsg() }}</p>
+    }
+
+    <div class="kpis">
+      <div>
+        <span class="label">Ingresos del mes</span>
+        <strong>{{
+          incomeThisMonth()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+      <div>
+        <span class="label">Total depositado</span>
+        <strong>{{
+          monthlyDeposited()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+      <div>
+        <span class="label">Total retirado</span>
+        <strong>{{
+          monthlyWithdrawn()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+      <div>
+        <span class="label">Saldo total ahorro</span>
+        <strong>{{
+          totalSavingsBalance()
+            | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+    </div>
+    <div class="grid actions">
+      <button
+        pButton
+        type="button"
+        label="Depositar a ahorro"
+        icon="pi pi-arrow-down-left"
+        (click)="setMoveKind('deposit')"
+        class="btn-sm"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Retirar de ahorro"
+        icon="pi pi-arrow-up-right"
+        (click)="setMoveKind('withdraw')"
+        class="btn-sm"
+      ></button>
+    </div>
+  </p-card>
+
+  <p-dialog
+    [header]="adHocForm.value.kind === 'withdraw' ? 'Retiro puntual' : 'Depósito puntual'"
+    [visible]="showAdHocForm()"
+    (visibleChange)="showAdHocForm.set($event)"
+    [modal]="true"
+    [dismissableMask]="true"
+    [style]="{ width: '720px', maxWidth: '95vw' }"
+  >
+    <form
+      id="adHocForm"
+      [formGroup]="adHocForm"
+      (ngSubmit)="openConfirmAdHoc()"
+      class="grid savings-form"
+    >
+      <label>
+        <span>Tipo de movimiento</span>
+        <p-select
+          formControlName="kind"
+          class="date-compact"
+          [options]="[
+            { label: 'Depositar', value: 'deposit' },
+            { label: 'Retirar', value: 'withdraw' }
+          ]"
+          optionLabel="label"
+          optionValue="value"
+        ></p-select>
+      </label>
+      <label>
+        <span>Cuenta origen</span>
+        <p-select
+          formControlName="sourceAccountId"
+          class="date-compact"
+          [options]="adHocForm.value.kind === 'withdraw' ? savingsOptions() : operatingOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+          appendTo="body"
+        ></p-select>
+      </label>
+      <label>
+        <span>Cuenta destino</span>
+        <p-select
+          formControlName="targetAccountId"
+          class="date-compact"
+          [options]="adHocForm.value.kind === 'withdraw' ? operatingOptions() : savingsOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+          appendTo="body"
+        ></p-select>
+      </label>
+      <label>
+        <span>Fecha</span>
+        <p-datepicker
+          formControlName="date"
+          dateFormat="yy-mm-dd"
+          [style]="{ width: '100%' }"
+          appendTo="body"
+          class="date-compact"
+        ></p-datepicker>
+      </label>
+      <label>
+        <span>Monto</span>
+        <p-inputNumber
+          formControlName="amount"
+          mode="decimal"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [min]="0.01"
+        ></p-inputNumber>
+      </label>
+      <label>
+        <span>Nota (opcional)</span>
+        <input pInputText formControlName="note" placeholder="Ahorro puntual" />
+      </label>
+      <div class="actions">
+        <button
+          pButton
+          type="submit"
+          [disabled]="loading()"
+          [label]="
+            adHocForm.value.kind === 'withdraw' ? 'Retirar de ahorro' : 'Transferir a ahorro'
+          "
+          [icon]="
+            adHocForm.value.kind === 'withdraw' ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-left'
+          "
+          class="btn-sm"
+        ></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <p-dialog
+    header="Confirmar transferencia"
+    [visible]="showConfirm()"
+    (visibleChange)="showConfirm.set($event)"
+    [modal]="true"
+    [dismissableMask]="true"
+    [style]="{ width: '420px' }"
+  >
+    <p>{{ confirmText() }}</p>
+    <ng-template #footer>
+      <button
+        pButton
+        type="button"
+        class="p-button-text"
+        label="Cancelar"
+        (click)="showConfirm.set(false)"
+        [disabled]="loading()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Confirmar"
+        icon="pi pi-check"
+        (click)="adHocTransfer()"
+        [disabled]="loading()"
+        styleClass="btn-sm"
+      ></button>
+    </ng-template>
+  </p-dialog>
+
+  <app-account-summary
+    [accountTotals]="savingsTotals()"
+    [currencyCode]="transactionService.currencyCode()"
+    incomeLabel="Depósito"
+    expenseLabel="Retiro"
+  />
+
+  <!-- <p-card>
+    <ng-template #header>
+      <span class="p-card-title">Resumen de cuentas de ahorro</span>
+    </ng-template>
+    <app-account-summary
+      [accountTotals]="savingsTotals()"
+      [currencyCode]="transactionService.currencyCode()"
+      incomeLabel="Depósito"
+      expenseLabel="Retiro"
+    />
+  </p-card> -->
+
+  <p-card>
+    <ng-template #title>Histórico de movimientos ({{ filteredMoves().length }}) </ng-template>
+    <p-table
+      #dt
+      [value]="filteredMoves()"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'table-layout': 'fixed' }"
+      [globalFilterFields]="['date', 'note', 'kind', 'amount']"
+    >
+      <ng-template #caption>
+        <div class="table-toolbar">
+          <p-button
+            label="Limpiar"
+            [outlined]="true"
+            icon="pi pi-filter-slash"
+            (click)="dt.clear()"
+          />
+          <p-iconfield iconPosition="left" class="ml-auto">
+            <p-inputicon>
+              <i class="pi pi-search"></i>
+            </p-inputicon>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Buscar en todos"
+            />
+          </p-iconfield>
+        </div>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th pSortableColumn="date">
+            Fecha <p-sortIcon field="date"></p-sortIcon>
+            <p-columnFilter field="date" type="date" display="menu"></p-columnFilter>
+          </th>
+          <th pSortableColumn="amount">
+            Monto <p-sortIcon field="amount"></p-sortIcon>
+            <p-columnFilter field="amount" type="numeric" display="menu"></p-columnFilter>
+          </th>
+          <th pSortableColumn="kind">
+            Tipo <p-sortIcon field="kind"></p-sortIcon>
+            <p-columnFilter field="kind" matchMode="equals" display="menu" [showMatchModes]="false">
+              <ng-template #filter let-value let-filter="filterCallback">
+                <p-select
+                  [options]="[
+                    { label: 'Todos', value: null },
+                    { label: 'Depósito', value: 'deposit' },
+                    { label: 'Retiro', value: 'withdraw' }
+                  ]"
+                  [ngModel]="value"
+                  (onChange)="filter($any($event).value)"
+                  placeholder="Todos"
+                ></p-select>
+              </ng-template>
+            </p-columnFilter>
+          </th>
+          <th>
+            Nota
+            <p-columnFilter field="note" type="text" display="menu"></p-columnFilter>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-m>
+        <tr>
+          <td>{{ m.date }}</td>
+          <td>
+            {{
+              m.amount | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+            }}
+          </td>
+          <td>
+            <p-tag
+              [severity]="m.kind === 'deposit' ? 'success' : 'warn'"
+              [value]="m.kind === 'deposit' ? 'Depósito' : 'Retiro'"
+              [icon]="m.kind === 'deposit' ? 'pi pi-arrow-down-left' : 'pi pi-arrow-up-right'"
+            ></p-tag>
+          </td>
+          <td>{{ m.note || '—' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="3" class="empty">Sin movimientos registrados.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</section>

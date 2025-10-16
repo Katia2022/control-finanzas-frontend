@@ -4,7 +4,6 @@ import { CategoriesApi } from '../api/categories.api';
 import { TransactionsApi, TxType } from '../api/transactions.api';
 import { BudgetsApi } from '../api/budgets.api';
 import { SettingsApi } from '../api/settings.api';
-import { SavingsApi, PlanType, PlanStatus } from '../api/savings.api';
 
 @Injectable({ providedIn: 'root' })
 export class MigrationService {
@@ -13,7 +12,8 @@ export class MigrationService {
   private readonly txApi = inject(TransactionsApi);
   private readonly budgetsApi = inject(BudgetsApi);
   private readonly settingsApi = inject(SettingsApi);
-  private readonly savingsApi = inject(SavingsApi);
+  // Savings plans/moves removed; keep injection only if needed for ad-hoc in future
+  // SavingsApi not used (plans removed)
 
   async migrateIfNeeded(): Promise<void> {
     const FLAG = 'app.migratedToBackend';
@@ -76,27 +76,7 @@ export class MigrationService {
         try { await this.settingsApi.patch({ savingsMinRate: settings.savingsMinRate }).toPromise(); } catch {}
       }
 
-      // 7) Savings plans (moves se programarán desde la UI)
-      for (const p of savingsPlans) {
-        const type: PlanType = (p.type === 'percent') ? 'PERCENT' : 'FIXED';
-        const status: PlanStatus = (p.status === 'paused') ? 'PAUSED' : 'ACTIVE';
-        const sourceAccountId = p.sourceAccount ? accIdByName.get(p.sourceAccount) : undefined;
-        const targetAccountId = p.targetAccount ? accIdByName.get(p.targetAccount) : undefined;
-        try {
-          await this.savingsApi.createPlan({
-            name: p.name,
-            monthKey: p.monthKey,
-            type,
-            amountPlanned: p.amountPlanned || 0,
-            percent: p.percent ?? undefined,
-            priority: p.priority ?? 1,
-            status,
-            sourceAccountId, targetAccountId,
-          }).toPromise();
-        } catch {}
-      }
-
-      // Nota: no migramos savingsMoves uno a uno (no hay endpoint de creación directa). Podrás programarlos con el botón en la UI.
+      // 7) Savings plans/moves: feature removed; no server-side migration required.
 
       // 8) Clear local storage & set flag
       const keys = [
@@ -110,4 +90,3 @@ export class MigrationService {
     }
   }
 }
-

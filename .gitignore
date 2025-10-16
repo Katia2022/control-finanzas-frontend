@@ -45,3 +45,11 @@ Thumbs.db
 server/target/
 
 .vscode/
+
+electron/
+
+release/
+
+scripts/
+
+package-lock.json

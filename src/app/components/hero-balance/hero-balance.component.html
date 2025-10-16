@@ -8,24 +8,34 @@
     </p>
   </div>
   <article class="balance-card">
-    <p class="balance-card__label">Balance actual</p>
+    <div class="balance-card__tip">
+      <button pButton type="button" icon="pi pi-lightbulb" (click)="showSavingsTip()"
+        class="p-button-rounded p-button-success p-button-sm" pTooltip="Consejo de ahorro"
+        tooltipPosition="left"></button>
+    </div>
+    <p class="balance-card__label" pTooltip="Saldo actual = Saldos iniciales + Ingresos − Gastos (en el periodo visible)." tooltipPosition="top">Balance actual</p>
+    <p class="balance-card__range" *ngIf="periodStart && periodEnd">
+      {{ periodStart }} — {{ periodEnd }}
+    </p>
+    <p class="balance-card__status" *ngIf="loading">Cargando datos…</p>
+    <p class="balance-card__status balance-card__status--error" *ngIf="!loading && error">{{ error }}</p>
     <p class="balance-card__amount">
       {{ balance | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}
     </p>
     <dl class="balance-card__totals">
-      <div>
+      <div pTooltip="Suma de todos los ingresos en cuentas operativas dentro del periodo." tooltipPosition="top">
         <dt>Ingresos</dt>
-        <dd>{{ totalIncome | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
+        <dd>{{ totalIncome | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}</dd>
       </div>
-      <div>
+      <div pTooltip="Suma de todos los gastos en cuentas operativas dentro del periodo." tooltipPosition="top">
         <dt>Gastos</dt>
-        <dd>{{ totalExpense | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
+        <dd>{{ totalExpense | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}</dd>
       </div>
-      <div>
+      <div pTooltip="Ahorro total (saldo actual en cuentas de ahorro)." tooltipPosition="top">
         <dt>Ahorro</dt>
-        <dd>{{ (savingsRate * 100) | number: '1.0-1' }}%</dd>
+        <dd>{{ totalSavings | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}</dd>
       </div>
     </dl>
   </article>
+  
 </section>
-

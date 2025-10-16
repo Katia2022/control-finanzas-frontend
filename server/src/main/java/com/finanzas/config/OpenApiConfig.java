@@ -1,5 +1,6 @@
 package com.finanzas.config;
 
+import com.finanzas.common.Constants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -13,9 +14,9 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .components(new Components())
                 .info(new Info()
-                        .title("Control Finanzas API")
-                        .version("0.1.0")
-                        .description("API para cuentas y ahorro (iteración inicial)"));
+                        .title(Constants.API_TITLE)
+                        .version(Constants.API_VERSION)
+                        .description(Constants.API_DESCRIPTION));
     }
 }
 

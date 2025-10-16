@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+﻿import { Injectable, inject, signal } from '@angular/core';
 import { AccountsApi, AccountView } from '../api/accounts.api';
 
 @Injectable({ providedIn: 'root' })
@@ -10,9 +10,7 @@ export class AccountsService {
   readonly lastInfo = signal<string | null>(null);
   private lastList: AccountView[] = [];
 
-  constructor() {
-    this.refresh();
-  }
+  constructor() {}
 
   add(name: string): void {
     const trimmed = name.trim();
@@ -68,17 +66,29 @@ export class AccountsService {
 
   private updateInitials(map: Record<string, number>) { this.initialBalances.set(map); }
 
+  ensureLoaded() {
+    this.api.list().subscribe({
+      next: (list) => {
+        this.lastList = list || [];
+        this.accounts.set(this.lastList.map(a => a.name).sort((a, b) => a.localeCompare(b)));
+        const init: Record<string, number> = {};
+        this.lastList.forEach(a => { init[a.name] = a.initialBalance ?? 0; });
+        this.initialBalances.set(init);
+      },
+      error: () => { this.lastList = []; this.accounts.set([]); this.initialBalances.set({}); }
+    });
+  }
+
   private refresh() {
     this.api.list().subscribe({
       next: (list) => {
-        this.lastList = list;
-        this.accounts.set(list.map(a => a.name).sort((a, b) => a.localeCompare(b)));
+        this.lastList = list || [];
+        this.accounts.set(this.lastList.map(a => a.name).sort((a, b) => a.localeCompare(b)));
         const initials: Record<string, number> = {};
-        list.forEach(a => { initials[a.name] = a.initialBalance ?? 0; });
+        this.lastList.forEach(a => { initials[a.name] = a.initialBalance ?? 0; });
         this.initialBalances.set(initials);
-        this.lastError.set(null);
       },
-      error: () => this.lastError.set('No se pudieron cargar las cuentas.'),
+      error: () => {}
     });
   }
 }

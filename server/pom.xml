@@ -29,6 +29,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.32</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
@@ -117,10 +123,11 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-maven-plugin</artifactId>
-            <version>1.7.0</version>
+            <groupId>org.openapitools</groupId>
+            <artifactId>openapi-generator-maven-plugin</artifactId>
+            <version>7.6.0</version>
             <executions>
+
               <execution>
                 <id>generate-openapi</id>
                 <phase>verify</phase>

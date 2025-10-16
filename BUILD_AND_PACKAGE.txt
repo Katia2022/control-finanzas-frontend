@@ -1,0 +1,61 @@
+Guía rápida: construir y actualizar el ejecutable (Windows)
+
+Prerequisitos
+- Node.js + npm
+- Java 17 (si no se embebe JRE en `electron/jre`)
+- Maven en PATH
+
+Rutas importantes
+- Ejecutable portable: release/Control Finanzas-win32-x64/Control Finanzas.exe
+- Instalador: release/installer/Control-Finanzas-Setup.exe
+- Frontend build: dist/control-finanzas-frontend/browser
+- JAR backend en el paquete: electron/backend/control-finanzas-server.jar
+- Log backend en runtime: %APPDATA%/Control Finanzas/backend.log
+
+Flujos según el tipo de cambio
+
+1) Cambios SOLO en el Frontend (Angular)
+- Comando: npm run electron:pack
+- Resultado: se actualiza el .exe en release/Control Finanzas-win32-x64
+
+2) Cambios en el Backend (Spring Boot)
+- Comandos:
+  - npm run build:backend       (compila y reempaqueta el JAR ejecutable)
+  - npm run prep:backend        (copia el JAR a electron/backend/control-finanzas-server.jar)
+  - npm run electron:pack       (re-empaqueta el .exe)
+
+3) Cambios en Electron (electron/main.js) o scripts de empaquetado
+- Comando: npm run electron:pack
+
+4) Generar Instalador (opcional)
+- Requisitos: que exista la app portable en release/Control Finanzas-win32-x64
+- Comando: npm run installer:win
+- Resultado: release/installer/Control-Finanzas-Setup.exe
+
+Desarrollo rápido
+- Comando: npm run electron:dev
+- Abre Angular en 4200 y Electron en modo desarrollo (hot reload del frontend).
+
+Problemas comunes y soluciones
+- Pantalla en blanco (file://): solucionado sirviendo estáticos por HTTP interno.
+- Reload rompe rutas: se usa hash routing (withHashLocation()).
+- CORS 403 al llamar al backend: WebConfig permite http://localhost:* y http://127.0.0.1:*
+- Java versión errónea: el backend requiere Java 17. Verificar con `java -version`.
+- Backend no arranca: revisar %APPDATA%/Control Finanzas/backend.log
+- Carpeta de salida bloqueada: cerrar la app y volver a empaquetar.
+
+Comandos disponibles (resumen)
+- Frontend + empaquetado: npm run electron:pack
+- Backend (build + copiar + empaquetar): npm run build:backend && npm run prep:backend && npm run electron:pack
+- Solo copiar backend al paquete: npm run prep:backend
+- Dev mode: npm run electron:dev
+- Instalador: npm run installer:win
+
+Nota sobre JRE embebido (opcional)
+- Si colocas un JRE 17 en `electron/jre/bin/java.exe`, la app no dependerá de Java del sistema.
+
+Instalar un JRE 17 embebido
+- Descarga un ZIP de JRE 17 (Temurin/OpenJDK) para Windows x64.
+- Ejecuta: `powershell -ExecutionPolicy Bypass -File scripts/install-jre.ps1 -ZipPath "C:\ruta\a\jre17.zip"`
+- Verifica que exista: `electron/jre/bin/java.exe`
+- Reempaqueta: `npm run electron:pack`

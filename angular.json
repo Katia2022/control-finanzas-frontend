@@ -3,7 +3,10 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "analytics": false
+    "analytics": false,
+    "cache": {
+      "enabled": false
+    }
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -22,6 +25,7 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
+            "baseHref": "./",
             "assets": [
               {
                 "glob": "**/*",
@@ -29,29 +33,19 @@
               }
             ],
             "styles": [
+              "primeicons/primeicons.css",
               "src/styles.css"
             ]
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kB",
-                  "maximumError": "12kB"
-                }
-              ],
               "outputHashing": "all"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "aot": true
             }
           },
           "defaultConfiguration": "production"
@@ -63,7 +57,8 @@
               "buildTarget": "control-finanzas-frontend:build:production"
             },
             "development": {
-              "buildTarget": "control-finanzas-frontend:build:development"
+              "buildTarget": "control-finanzas-frontend:build:development",
+              "hmr": false
             }
           },
           "defaultConfiguration": "development"

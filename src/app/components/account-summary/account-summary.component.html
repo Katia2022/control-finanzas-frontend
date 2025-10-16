@@ -1,30 +1,67 @@
-<article class="card summaries-card">
-  <header class="card__header">
-    <h2>Resumen por cuenta</h2>
-    <p>Distribución de gastos por cuenta.</p>
-  </header>
+@if (!embedded) {
+<p-card [header]="header" [subheader]="subheader">
   @if (accountTotals.length) {
-    <div class="account-grid">
-      <article class="account-card" *ngFor="let item of accountTotals">
-        <header>
-          <h3 class="account-card__name">{{ item.account }}</h3>
-          <p class="account-card__balance" [class.positive]="item.balance >= 0" [class.negative]="item.balance < 0">
-            {{ item.balance | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}
-          </p>
-        </header>
-        <dl class="account-card__totals">
-          <div>
-            <dt>Ingresos</dt>
-            <dd class="income">{{ item.income | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
-          </div>
-          <div>
-            <dt>Gastos</dt>
-            <dd class="expense">{{ item.expense | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</dd>
-          </div>
-        </dl>
-      </article>
-    </div>
+  <div class="account-grid">
+    <p-card *ngFor="let item of accountTotals" styleClass="account-card">
+      <ng-template #header>
+        <div class="account-card__header">
+          <span class="account-card__name">{{ item.account }}</span>
+          <p-tag
+            [severity]="item.balance >= 0 ? 'success' : 'danger'"
+            value="{{ item.balance | currency : currencyCode : 'symbol-narrow' : '1.2' }}"
+          ></p-tag>
+        </div>
+      </ng-template>
+
+      <div class="account-card__totals">
+        <div class="account-pill">
+          <span class="label">{{ incomeLabel }}</span>
+          <span class="value income">{{
+            item.income | currency : currencyCode : 'symbol-narrow' : '1.2'
+          }}</span>
+        </div>
+        <div class="account-pill">
+          <span class="label">{{ expenseLabel }}</span>
+          <span class="value expense">{{
+            item.expense | currency : currencyCode : 'symbol-narrow' : '1.2'
+          }}</span>
+        </div>
+      </div>
+    </p-card>
+  </div>
   } @else {
-    <p class="empty">Aún no registras gastos.</p>
+  <p class="empty">Aún no registras gastos.</p>
   }
-</article>
+</p-card>
+} @else { @if (accountTotals.length) {
+<div class="account-grid">
+  <p-card *ngFor="let item of accountTotals" styleClass="account-card">
+    <ng-template #header>
+      <div class="account-card__header">
+        <span class="account-card__name">{{ item.account }}</span>
+        <p-tag
+          [severity]="item.balance >= 0 ? 'success' : 'danger'"
+          value="{{ item.balance | currency : currencyCode : 'symbol-narrow' : '1.2' }}"
+        ></p-tag>
+      </div>
+    </ng-template>
+
+    <div class="account-card__totals">
+      <div class="account-pill">
+        <span class="label">{{ incomeLabel }}</span>
+        <span class="value income">{{
+          item.income | currency : currencyCode : 'symbol-narrow' : '1.2'
+        }}</span>
+      </div>
+      <div class="account-pill">
+        <span class="label">{{ expenseLabel }}</span>
+        <span class="value expense">{{
+          item.expense | currency : currencyCode : 'symbol-narrow' : '1.2'
+        }}</span>
+      </div>
+    </div>
+  </p-card>
+</div>
+} @else {
+<p class="empty">Aún no registras gastos.</p>
+} }

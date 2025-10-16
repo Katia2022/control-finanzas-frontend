@@ -3,9 +3,18 @@ package com.finanzas.accounts;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "accounts")
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString
 public class Account {
     public enum Type { OPERATIVA, AHORRO }
     @Id
@@ -24,15 +33,4 @@ public class Account {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private Type type = Type.OPERATIVA;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public BigDecimal getInitialBalance() { return initialBalance; }
-    public void setInitialBalance(BigDecimal initialBalance) { this.initialBalance = initialBalance; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-    public Type getType() { return type; }
-    public void setType(Type type) { this.type = type; }
 }

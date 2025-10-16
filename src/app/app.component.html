@@ -1,0 +1,19 @@
+<main class="layout">
+  <p-toast position="top-right"></p-toast>
+
+  <p-menubar>
+    <ng-template pTemplate="start">
+      <nav class="tabs">
+        <a routerLink="/" routerLinkActive="router-link-active" [routerLinkActiveOptions]="{ exact: true }" class="tab"><i class="pi pi-home"></i> Resumen</a>
+        <a routerLink="/movimientos" routerLinkActive="router-link-active" class="tab"><i class="pi pi-list"></i> Movimientos</a>
+        <a routerLink="/presupuesto" routerLinkActive="router-link-active" class="tab"><i class="pi pi-chart-bar"></i> Presupuesto</a>
+        <a routerLink="/ahorro" routerLinkActive="router-link-active" class="tab"><i class="pi pi-wallet"></i> Ahorro</a>
+        <a routerLink="/categorias" routerLinkActive="router-link-active" class="tab"><i class="pi pi-star"></i> Categorías</a>
+        <a routerLink="/cuentas" routerLinkActive="router-link-active" class="tab"><i class="pi pi-credit-card"></i> Cuentas</a>
+        <a routerLink="/configuracion" routerLinkActive="router-link-active" class="tab"><i class="pi pi-cog"></i> Configuración</a>
+      </nav>
+    </ng-template>
+  </p-menubar>
+
+  <router-outlet />
+</main>

@@ -1,76 +1,52 @@
-<article class="card form-card">
-  <header class="card__header">
-    <h2>Registrar movimiento</h2>
-    <p>Captura cada ingreso o gasto para mantener actualizado tu balance.</p>
-  </header>
+<p-card header="Registrar movimiento" subheader="Captura cada ingreso o gasto para mantener actualizado tu balance.">
   <form [formGroup]="form" (ngSubmit)="submitted.emit()" class="form">
     <div class="form__row">
-      <label class="form__field">
+      <div class="form__field">
         <span>Tipo</span>
-        <select formControlName="type">
-          <option value="income">Ingreso</option>
-          <option value="expense">Gasto</option>
-        </select>
-      </label>
-      <label class="form__field">
+        <p-select formControlName="type" [options]="[{label:'Ingreso', value:'income'},{label:'Gasto', value:'expense'}]" optionLabel="label" optionValue="value"></p-select>
+      </div>
+      <div class="form__field">
         <span>Fecha</span>
-        <input type="date" formControlName="date" />
+        <p-datepicker formControlName="date" dateFormat="yy-mm-dd"></p-datepicker>
         @if (form.get('date')?.touched && form.get('date')?.invalid) {
-          <small>
-            Selecciona una fecha válida.
-          </small>
+          <small>Selecciona una fecha válida.</small>
         }
-      </label>
-    </div>
-    <div class="form__row">
-      <label class="form__field">
+      </div>
+      <div class="form__field">
         <span>Categoría</span>
-        <input type="text" formControlName="category" placeholder="Ej. Supermercado" [attr.list]="'categories-list'" />
+        <p-select formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" placeholder="Selecciona o escribe" [editable]="true"></p-select>
         @if (form.get('category')?.touched && form.get('category')?.invalid) {
-          <small>
-            La categoría es obligatoria y debe tener menos de 40 caracteres.
-          </small>
+          <small>La categoría es obligatoria y debe tener menos de 40 caracteres.</small>
         }
-      </label>
-      <label class="form__field">
+      </div>
+      <div class="form__field">
         <span>Cuenta</span>
-        <input type="text" formControlName="account" placeholder="Ej. Tarjeta" [attr.list]="'accounts-list'" />
+        <p-select formControlName="account" [options]="accountOptions" optionLabel="label" optionValue="value" placeholder="Selecciona o escribe" [editable]="true"></p-select>
         @if (form.get('account')?.touched && form.get('account')?.invalid) {
-          <small>
-            La cuenta es obligatoria y debe tener menos de 40 caracteres.
-          </small>
+          <small>La cuenta es obligatoria y debe tener menos de 40 caracteres.</small>
         }
-      </label>
-      <label class="form__field">
+      </div>
+      <div class="form__field">
         <span>Monto</span>
-        <input type="number" formControlName="amount" step="0.01" min="0" placeholder="0.00" />
+        <p-inputNumber formControlName="amount" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" [min]="0.01"></p-inputNumber>
         @if (form.get('amount')?.touched && form.get('amount')?.invalid) {
-          <small>
-            Ingresa un monto mayor a cero.
-          </small>
+          <small>Ingresa un monto mayor a cero.</small>
         }
-      </label>
+      </div>
     </div>
-    <label class="form__field">
+    <div class="form__field">
       <span>Descripción (opcional)</span>
-      <input type="text" formControlName="description" placeholder="Notas adicionales" [attr.list]="'fixed-names-list'" />
-    </label>
-    <button type="submit" class="button">Guardar movimiento</button>
+      <input pInputText type="text" formControlName="description" placeholder="Notas adicionales" list="fixed-names-list" />
+    </div>
+    <div class="form__actions">
+      <button pButton type="button" class="p-button-text" icon="pi pi-times" label="Cancelar" *ngIf="editing" (click)="cancel.emit()"></button>
+      <button pButton type="submit" [label]="editing ? 'Actualizar movimiento' : 'Guardar movimiento'" icon="pi pi-save" styleClass="btn-sm" [disabled]="form.invalid"></button>
+    </div>
   </form>
-</article>
+</p-card>
 
-<!-- Suggestions for category input -->
-<datalist id="categories-list">
-  <option *ngFor="let c of categories" [value]="c"></option>
-  <!-- note: list is provided by parent via input binding -->
-</datalist>
-
-<!-- Suggestions for description based on fixed expenses of selected category -->
+<!-- Sugerencias para descripción (se mantiene) -->
 <datalist id="fixed-names-list">
   <option *ngFor="let n of fixedNames" [value]="n"></option>
 </datalist>
-
-<!-- Suggestions for account input -->
-<datalist id="accounts-list">
-  <option *ngFor="let a of accounts" [value]="a"></option>
-</datalist>
+<!-- Se eliminan datalists de categoría/cuenta al usar p-select editable -->

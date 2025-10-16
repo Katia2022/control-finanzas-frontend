@@ -1,0 +1,84 @@
+<section class="view">
+  <app-hero-balance
+    [balance]="operatingBalance()"
+    [totalIncome]="operatingTotalIncome()"
+    [totalExpense]="operatingTotalExpense()"
+    [totalSavings]="totalSavings()"
+    [savingsRate]="operatingSavingsRate()"
+    [currencyCode]="transactionService.currencyCode()"
+    [periodStart]="transactionService.periodStart()"
+    [periodEnd]="transactionService.periodEnd()"
+    [loading]="transactionService.isLoading()"
+    [error]="transactionService.listError()"
+  />
+
+  <div style="display:flex; gap:.5rem; justify-content:flex-end; margin-top:.5rem; margin-bottom:.5rem;">
+    <button class="p-button p-button-text" type="button" (click)="expandAll()">Expandir todo</button>
+    <button class="p-button p-button-text" type="button" (click)="collapseAll()">Contraer todo</button>
+  </div>
+  <details [attr.open]="activeOpen[0] ? '' : null" (toggle)="onToggleEvent(0, $event)">
+    <summary style="cursor:pointer; font-weight:600; margin-bottom:.5rem; display:flex; align-items:center; justify-content:space-between; gap:.5rem;">
+      <span>Cuentas operativas</span>
+      <span style="font-weight:500; color:#374151;">Saldo: {{ operatingBalance() | currency: transactionService.currencyCode() : 'symbol-narrow' : '1.2-2' }}</span>
+    </summary>
+    <section>
+      <app-account-summary
+        [accountTotals]="operatingAccountTotals()"
+        [currencyCode]="transactionService.currencyCode()"
+      />
+    </section>
+  </details>
+
+  <details [attr.open]="activeOpen[1] ? '' : null" (toggle)="onToggleEvent(1, $event)">
+    <summary style="cursor:pointer; font-weight:600; margin:1rem 0 .5rem; display:flex; align-items:center; justify-content:space-between; gap:.5rem;">
+      <span>Gastos por categoría</span>
+      <span style="font-weight:500; color:#374151;">
+        Top: {{ transactionService.expenseByCategory().length ? transactionService.expenseByCategory()[0].category : '—' }}
+        ({{ transactionService.expenseByCategory().length ? (transactionService.expenseByCategory()[0].amount | currency: transactionService.currencyCode() : 'symbol-narrow' : '1.2-2') : ('0' | currency: transactionService.currencyCode() : 'symbol-narrow' : '1.2-2') }})
+      </span>
+    </summary>
+    <section>
+      <app-category-summary
+        [expenseByCategory]="transactionService.expenseByCategory()"
+        [currencyCode]="transactionService.currencyCode()"
+      />
+    </section>
+  </details>
+
+  <details [attr.open]="activeOpen[2] ? '' : null" (toggle)="onToggleEvent(2, $event)">
+    <summary style="cursor:pointer; font-weight:600; margin:1rem 0 .5rem; display:flex; align-items:center; justify-content:space-between; gap:.5rem;">
+      <span>Ahorro</span>
+      <span style="font-weight:500; color:#374151;">
+        Neto mes: {{ (transactionService.monthlySavingsByKey()[ transactionService.currentMonthKey() ] || 0) | currency: transactionService.currencyCode() : 'symbol-narrow' : '1.2-2' }}
+      </span>
+    </summary>
+    <section class="grid grid--two">
+      <app-account-summary
+        [accountTotals]="savingsAccountTotals()"
+        [currencyCode]="transactionService.currencyCode()"
+        header="Cuentas de ahorro"
+        subheader="Saldos y movimientos de ahorro"
+        incomeLabel="Depósito"
+        expenseLabel="Retiro"
+      />
+    </section>
+  </details>
+
+  <details [attr.open]="activeOpen[3] ? '' : null" (toggle)="onToggleEvent(3, $event)">
+    <summary style="cursor:pointer; font-weight:600; margin:1rem 0 .5rem;">Resumen mensual e insights</summary>
+    <section class="grid grid--two">
+      <app-monthly-summary
+        [monthlySummaries]="transactionService.monthlySummaries()"
+        [expenseByCategory]="transactionService.expenseByCategory()"
+        [monthlySavingsByKey]="transactionService.monthlySavingsByKey()"
+        [currencyCode]="transactionService.currencyCode()"
+      />
+
+      <app-insight-card
+        [insight]="transactionService.insight()"
+        [topMonthLabel]="transactionService.monthlySummaries().length ? transactionService.monthlySummaries()[0].label : null"
+        [topExpenseCategory]="transactionService.expenseByCategory().length ? transactionService.expenseByCategory()[0].category : null"
+      />
+    </section>
+  </details>
+</section>

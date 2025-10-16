@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { PRIMENG_IMPORTS } from '../../shared/primeng';
+import { AccountTypeLabelPipe, AccountTypeSeverityPipe } from '../../shared/pipes/account-type.pipe';
 import { AccountsService } from '../../services/accounts.service';
 import { AccountsApi, AccountType, AccountView } from '../../api/accounts.api';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-accounts-card',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ...PRIMENG_IMPORTS, AccountTypeLabelPipe, AccountTypeSeverityPipe],
   templateUrl: './accounts-card.component.html',
   styleUrl: './accounts-card.component.css',
 })
@@ -15,6 +18,7 @@ export class AccountsCardComponent implements OnInit {
   private readonly accountsSvc = inject(AccountsService);
   private readonly accountsApi = inject(AccountsApi);
   private readonly fb = inject(FormBuilder);
+  private readonly msg = inject(MessageService);
   readonly accounts = this.accountsSvc.accounts;
   addError = signal<string | null>(null);
   serverAccounts = signal<AccountView[]>([]);
@@ -23,13 +27,30 @@ export class AccountsCardComponent implements OnInit {
 
   private readonly accountsLower = computed(() => this.accounts().map(a => a.toLocaleLowerCase()));
 
+  // Table rows enriched for PrimeNG p-table (avoid arrow functions in template)
+  readonly rows = computed(() => this.accounts().map(a => ({
+    name: a,
+    type: this.typeOf(a),
+    initial: this.initialOf(a),
+  })));
+
   // UI state
   newAccCtrl = this.fb.control('', { validators: [Validators.required, Validators.maxLength(40)] });
   newAccType = this.fb.control<AccountType>('OPERATIVA', { nonNullable: true });
   editing = signal<string | null>(null);
   editCtrl = this.fb.control('', { validators: [Validators.required, Validators.maxLength(40)] });
 
+  // Toast notifications from AccountsService signals
+  readonly toastFx = effect(() => {
+    const err = this.errorMsg();
+    const info = this.infoMsg();
+    if (err) this.msg.add({ severity: 'error', summary: 'Cuentas', detail: err, life: 3000 });
+    if (info) this.msg.add({ severity: 'success', summary: 'Cuentas', detail: info, life: 2000 });
+  });
+
   ngOnInit(): void {
+    // Ensure cached state for listing
+    this.accountsSvc.ensureLoaded?.();
     this.refreshFromServer();
   }
 

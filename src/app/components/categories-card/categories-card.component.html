@@ -1,17 +1,10 @@
-<article class="card">
-  <header class="card__header">
-    <h2>Categorías</h2>
-    <p>Gestiona las categorías disponibles.</p>
-  </header>
+<p-card header="Categorías" subheader="Gestiona las categorías disponibles.">
 
-  <div class="messages">
-    <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
-    <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
-  </div>
+  <!-- Inline messages removed; toasts handle feedback -->
 
   <form class="row-add" (ngSubmit)="add()">
-    <input type="text" [formControl]="newCatCtrl" placeholder="Nueva categoría" />
-    <button type="submit" class="button">Añadir</button>
+    <input pInputText type="text" [formControl]="newCatCtrl" placeholder="Nueva categoría" />
+    <button pButton type="submit" label="Añadir" icon="pi pi-plus" [disabled]="newCatCtrl.invalid"></button>
   </form>
   @if (newCatCtrl.touched && newCatCtrl.invalid) {
     <small class="error">Nombre requerido (máx. 40).</small>
@@ -22,16 +15,16 @@
       @if (editing() !== cat) {
         <span class="name">{{ cat }}</span>
         <div class="actions">
-          <button class="link" type="button" (click)="startEdit(cat)">Editar</button>
-          <button class="link danger" type="button" (click)="remove(cat)">Eliminar</button>
+          <button pButton [text]="true" type="button" icon="pi pi-pencil" (click)="startEdit(cat)"></button>
+          <button pButton [text]="true" type="button" icon="pi pi-trash" severity="danger" (click)="remove(cat)"></button>
         </div>
       } @else {
-        <input type="text" [formControl]="editCtrl" />
+        <input pInputText type="text" [formControl]="editCtrl" />
         <div class="actions">
-          <button class="link" type="button" (click)="saveEdit()">Guardar</button>
-          <button class="link" type="button" (click)="cancelEdit()">Cancelar</button>
+          <button pButton [text]="true" type="button" icon="pi pi-check" (click)="saveEdit()" [disabled]="editCtrl.invalid"></button>
+          <button pButton [text]="true" type="button" icon="pi pi-times" (click)="cancelEdit()"></button>
         </div>
       }
     </li>
   </ul>
-</article>
+</p-card>

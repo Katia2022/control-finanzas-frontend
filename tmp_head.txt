@@ -1,0 +1,402 @@
+<section class="view savings">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="header-top">
+        <span class="p-card-title">Ahorro del mes {{ monthKey() }}</span>
+      </div>
+    </ng-template>
+    <p *ngIf="loading()">Cargando…</p>
+    <p class="error" *ngIf="errorMsg() as err">{{ err }}</p>
+    <p class="info" *ngIf="infoMsg() as msg">{{ msg }}</p>
+    <div class="kpis">
+      <div>
+        <span class="label">Ingresos del mes</span>
+        <strong>{{
+          incomeThisMonth() | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+      <div>
+        <span class="label">Ahorro planeado</span>
+        <strong>{{
+          plannedThisMonth() | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+      <div>
+        <span class="label">Ahorro ejecutado</span>
+        <strong>{{
+          executedThisMonth() | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+      <div>
+        <span class="label">Disponible para gastos</span>
+        <strong>{{
+          availableForExpenses() | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+        }}</strong>
+      </div>
+    </div>
+  </p-card>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <span class="p-card-title">Nuevo plan de ahorro</span>
+    </ng-template>
+    <form [formGroup]="createForm" (ngSubmit)="addPlan()" class="grid savings-form">
+      <label>
+        <span>Nombre</span>
+        <input pInputText formControlName="name" placeholder="p.ej. Ahorro 10%" />
+      </label>
+      <label>
+        <span>Tipo</span>
+        <p-select
+          formControlName="type"
+          [options]="[
+            { label: 'Monto fijo', value: 'fixed' },
+            { label: 'Porcentaje de ingresos', value: 'percent' }
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+        ></p-select>
+      </label>
+      <label *ngIf="createForm.value.type === 'fixed'">
+        <span>Monto</span>
+        <p-inputNumber
+          formControlName="amountPlanned"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+        ></p-inputNumber>
+      </label>
+      <label *ngIf="createForm.value.type === 'percent'">
+        <span>Porcentaje (0 a 1)</span>
+        <p-inputNumber
+          formControlName="percent"
+          [min]="0"
+          [max]="1"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+        ></p-inputNumber>
+      </label>
+      <label>
+        <span>Prioridad</span>
+        <p-inputNumber formControlName="priority" [min]="1" [useGrouping]="false"></p-inputNumber>
+      </label>
+      <label>
+        <span>Cuenta origen (Operativa)</span>
+        <p-select
+          formControlName="sourceAccountId"
+          [options]="operativasOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+        ></p-select>
+      </label>
+      <label>
+        <span>Cuenta destino (Ahorro)</span>
+        <p-select
+          formControlName="targetAccountId"
+          [options]="ahorroOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+        ></p-select>
+      </label>
+      <div class="actions">
+        <button
+          pButton
+          type="submit"
+          label="Agregar plan"
+          icon="pi pi-plus"
+          styleClass="btn-sm"
+        ></button>
+      </div>
+    </form>
+  </p-card>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <span class="p-card-title">Movimiento puntual</span>
+    </ng-template>
+    <form [formGroup]="adHocForm" (ngSubmit)="openConfirmAdHoc()" class="grid savings-form">
+      <label>
+        <span>Tipo de movimiento</span>
+        <p-select
+          formControlName="kind"
+          [options]="[
+            { label: 'Depositar a ahorro', value: 'deposit' },
+            { label: 'Retirar de ahorro', value: 'withdraw' }
+          ]"
+          optionLabel="label"
+          optionValue="value"
+        ></p-select>
+      </label>
+      <label>
+        <span>Cuenta origen</span>
+        <p-select
+          formControlName="sourceAccountId"
+          [options]="adHocForm.value.kind === 'withdraw' ? ahorroOptions() : operativasOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+        ></p-select>
+      </label>
+      <label>
+        <span>Cuenta destino</span>
+        <p-select
+          formControlName="targetAccountId"
+          [options]="adHocForm.value.kind === 'withdraw' ? operativasOptions() : ahorroOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Selecciona"
+        ></p-select>
+      </label>
+      <label>
+        <span>Fecha</span>
+        <p-datepicker formControlName="date" dateFormat="yy-mm-dd"></p-datepicker>
+      </label>
+      <label>
+        <span>Monto</span>
+        <p-inputNumber
+          formControlName="amount"
+          mode="decimal"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [min]="0.01"
+        ></p-inputNumber>
+      </label>
+      <label>
+        <span>Buffer mínimo</span>
+        <p-inputNumber
+          formControlName="buffer"
+          mode="decimal"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          [min]="0"
+          [useGrouping]="false"
+        ></p-inputNumber>
+      </label>
+      <div class="actions" style="grid-column: 1 / -1; justify-content: flex-start; gap: 0.5rem">
+        <button
+          pButton
+          type="button"
+          label="Calcular remanente"
+          icon="pi pi-calculator"
+          (click)="suggestAdHocAmount()"
+          styleClass="btn-sm"
+        ></button>
+      </div>
+      <label>
+        <span>Nota (opcional)</span>
+        <input pInputText formControlName="note" placeholder="Ahorro puntual" />
+      </label>
+      <div class="actions">
+        <button
+          pButton
+          type="submit"
+          [disabled]="loading()"
+          label="Transferir a ahorro"
+          icon="pi pi-arrow-right-arrow-left"
+          styleClass="btn-sm"
+        ></button>
+      </div>
+    </form>
+    <p-dialog
+      header="Confirmar transferencia"
+      [visible]="showConfirm()"
+      (visibleChange)="showConfirm.set($event)"
+      [modal]="true"
+      [dismissableMask]="true"
+      [style]="{ width: '420px' }"
+    >
+      <p>{{ confirmText() }}</p>
+      <ng-template pTemplate="footer">
+        <button
+          pButton
+          type="button"
+          class="p-button-text"
+          label="Cancelar"
+          (click)="showConfirm.set(false)"
+          [disabled]="loading()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Confirmar"
+          icon="pi pi-check"
+          (click)="adHocTransfer()"
+          [disabled]="loading()"
+          styleClass="btn-sm"
+        ></button>
+      </ng-template>
+    </p-dialog>
+  </p-card>
+
+  <p-card>
+    <div class="card__header">
+      <!-- Se eliminó la gestión de planes -->
+      <h3 style="display:none">Planes activos del mes</h3>
+    </div>
+    <p-table *ngIf="false" [value]="[]">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Monto/Pct</th>
+          <th>Prioridad</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-p>
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.type === 'FIXED' ? 'Fijo' : 'Porcentaje' }}</td>
+          <td>
+            <ng-container *ngIf="p.type === 'FIXED'; else pct">{{
+              p.amountPlanned | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2'
+            }}</ng-container>
+            <ng-template #pct>{{ (p.percent || 0) * 100 | number : '1.0-1' }}%</ng-template>
+          </td>
+          <td>{{ p.priority }}</td>
+          <td>{{ accountName(p.sourceAccountId) }}</td>
+          <td>{{ accountName(p.targetAccountId) }}</td>
+          <td>{{ p.status === 'ACTIVE' ? 'Activo' : 'Pausado' }}</td>
+          <td class="row-actions">
+            <!-- acciones de plan eliminadas -->
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="empty">Aún no hay planes para este mes.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-card style="display:none">
+    <ng-template pTemplate="header">
+      <span class="p-card-title">Movimientos del mes</span>
+    </ng-template>
+    <p-table [value]="[]">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha</th>
+          <th>Plan</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-m>
+        <tr>
+          <td>{{ m.date }}</td>
+          <td>Puntual</td>
+          <td>{{ m.amount | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2' }}</td>
+          <td>
+            {{
+              m.status === 'DONE'
+                ? 'Hecho'
+                : m.status === 'PENDING'
+                ? 'Pendiente'
+                : m.status === 'FAILED'
+                ? 'Fallido'
+                : m.status
+            }}
+          </td>
+          <td class="row-actions">
+            <button
+              pButton
+              *ngIf="m.status !== 'DONE'"
+              (click)="markDone(m.id)"
+              label="Marcar hecho"
+              icon="pi pi-check"
+            ></button>
+            <i *ngIf="m.status === 'DONE'" class="pi pi-check-circle done-icon" title="Hecho"></i>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="empty">Sin movimientos programados este mes.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <span class="p-card-title">Resumen de cuentas de ahorro</span>
+    </ng-template>
+    <app-account-summary
+      [accountTotals]="savingsTotals()"
+      [currencyCode]="transactionService.currencyCode()"
+      incomeLabel="Depósito"
+      expenseLabel="Retiro"
+    />
+  </p-card>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <span class="p-card-title">Histórico de movimientos</span>
+    </ng-template>
+    <form [formGroup]="filtersForm" class="grid" style="grid-template-columns: repeat(6, minmax(160px, 1fr)); align-items: end; margin-bottom: .5rem">
+      <label>
+        <span>Desde</span>
+        <p-datepicker formControlName="from" dateFormat="yy-mm-dd"></p-datepicker>
+      </label>
+      <label>
+        <span>Hasta</span>
+        <p-datepicker formControlName="to" dateFormat="yy-mm-dd"></p-datepicker>
+      </label>
+      <label>
+        <span>Estado</span>
+        <p-select
+          formControlName="status"
+          [options]="[
+            { label: 'Todos', value: null },
+            { label: 'Hecho', value: 'DONE' },
+            { label: 'Pendiente', value: 'PENDING' },
+            { label: 'Fallido', value: 'FAILED' }
+          ]"
+          optionLabel="label"
+          optionValue="value"
+        ></p-select>
+      </label>
+      <label style="grid-column: span 2">
+        <span>Buscar nota</span>
+        <input pInputText formControlName="text" placeholder="Buscar..." />
+      </label>
+      <div class="actions">
+        <button pButton type="button" label="Limpiar" class="btn-sm" (click)="filtersForm.reset({ from: null, to: null, status: null, text: '' })"></button>
+      </div>
+    </form>
+    <p-table [value]="filteredMoves()">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha</th>
+          <th>Monto</th>
+          <th>Nota</th>
+          <th>Estado</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-m>
+        <tr>
+          <td>{{ m.date }}</td>
+          <td>{{ m.amount | currency : transactionService.currencyCode() : 'symbol-narrow' : '1.2-2' }}</td>
+          <td>{{ m.note || '—' }}</td>
+          <td>
+            {{ m.status === 'DONE' ? 'Hecho' : m.status === 'PENDING' ? 'Pendiente' : m.status === 'FAILED' ? 'Fallido' : m.status }}
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="empty">Sin movimientos registrados.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</section>
+

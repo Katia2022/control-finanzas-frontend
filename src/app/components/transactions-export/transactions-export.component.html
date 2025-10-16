@@ -1,0 +1,50 @@
+<div class="export-form">
+  <div class="row">
+    <label>
+      <span>Nombre de archivo</span>
+      <input pInputText [ngModel]="filename()" (ngModelChange)="filename.set($event)" placeholder="movimientos.csv" />
+    </label>
+    <label>
+      <span>Delimitador</span>
+      <p-select [ngModel]="delimiter()" (ngModelChange)="delimiter.set($event)" [options]="[
+        { label: 'Coma (,)', value: ',' },
+        { label: 'Punto y coma (;)', value: ';' },
+        { label: 'Tabulación (\t)', value: '\t' }
+      ]" optionLabel="label" optionValue="value"></p-select>
+    </label>
+    <div class="check-field">
+      <p-checkbox inputId="hdr" [binary]="true" [ngModel]="includeHeader()" (ngModelChange)="includeHeader.set($event)"></p-checkbox>
+      <label for="hdr">Incluir encabezado</label>
+    </div>
+  </div>
+
+  <p-divider></p-divider>
+
+  <p>Se exportarán {{ transactions.length }} movimientos. Vista previa de {{ previewCount() }}:</p>
+  <div class="preview">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Cuenta</th><th>Descripción</th><th class="amount">Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of (transactions || []).slice(0, previewCount()); track $index) {
+        <tr>
+          <td>{{ t.id }}</td>
+          <td>{{ t.date }}</td>
+          <td>{{ t.type }}</td>
+          <td>{{ t.category }}</td>
+          <td>{{ t.account }}</td>
+          <td>{{ t.description || '—' }}</td>
+          <td class="amount">{{ t.amount | number : '1.2-2' }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button pButton type="button" label="Exportar CSV" icon="pi pi-download" (click)="exportNow()" class="btn-sm"></button>
+  </div>
+</div>

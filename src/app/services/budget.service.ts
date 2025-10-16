@@ -19,8 +19,16 @@ export class BudgetService {
   readonly lastInfo = signal<string | null>(null);
   private monthKey = this.currentMonthKey();
   private lastBudgets: { id: number; categoryName: string; amount: number }[] = [];
+  private budgetsLoaded = false;
+  private fixedLoaded = false;
+  private defaultsSynced = false;
 
-  constructor() {
+  constructor() {}
+
+  ensureLoaded() {
+    this.defaultsSynced = false;
+    this.budgetsLoaded = false;
+    this.fixedLoaded = false;
     this.refreshBudgets();
     this.refreshFixed();
   }
@@ -32,6 +40,8 @@ export class BudgetService {
       this.lastBudgets.forEach(b => { if (b.categoryName) map[b.categoryName] = b.amount; });
       this.categoryBudgets.set(map);
       this.lastError.set(null);
+      this.budgetsLoaded = true;
+      this.trySyncDefaultBudgets();
     }, error: () => this.lastError.set('No se pudo cargar el presupuesto.') });
   }
 
@@ -67,11 +77,14 @@ export class BudgetService {
 
   setCategoryBudget(category: string, amount: number) {
     if (!category.trim() || !Number.isFinite(amount) || amount < 0) return;
+    // Enforce minimum: cannot be below fixed sum for this category
+    const minFixed = this.fixedSumByCategory()[category] ?? 0;
+    const clamped = Math.max(amount, minFixed);
     // Find category id
     this.categoriesApi.list().subscribe(list => {
       const cat = (list || []).find(c => c.name === category);
       if (!cat) { this.lastError.set('Categoría no encontrada.'); return; }
-      this.budgetsApi.upsert(cat.id, this.monthKey, amount).subscribe({ next: () => { this.lastInfo.set('Presupuesto actualizado.'); this.refreshBudgets(); }, error: () => this.lastError.set('No se pudo actualizar el presupuesto.') });
+      this.budgetsApi.upsert(cat.id, this.monthKey, clamped).subscribe({ next: () => { this.lastInfo.set('Presupuesto actualizado.'); this.refreshBudgets(); }, error: () => this.lastError.set('No se pudo actualizar el presupuesto.') });
     });
   }
 
@@ -93,6 +106,54 @@ export class BudgetService {
     this.fixedApi.list().subscribe({ next: list => {
       const mapped: FixedExpense[] = (list || []).map((f: FixedExpenseDTO) => ({ id: f.id, name: f.name, amount: f.amount, category: f.category?.name }));
       this.updateFixed(mapped);
+      this.fixedLoaded = true;
+      this.trySyncDefaultBudgets();
     }, error: () => this.lastError.set('No se pudieron cargar los gastos fijos.') });
+  }
+
+  // Build a map with total fixed amounts per category name
+  private fixedSumByCategory(): Record<string, number> {
+    const sums: Record<string, number> = {};
+    for (const fx of this.fixedExpenses()) {
+      const cat = fx.category?.trim() || '';
+      if (!cat) continue;
+      sums[cat] = (sums[cat] ?? 0) + (Number.isFinite(fx.amount) ? fx.amount : 0);
+    }
+    return sums;
+  }
+
+  // Create default budgets for categories that have fixed expenses but no budget yet
+  private trySyncDefaultBudgets() {
+    if (this.defaultsSynced) return;
+    if (!(this.budgetsLoaded && this.fixedLoaded)) return;
+    const current = this.categoryBudgets();
+    const fixedMap = this.fixedSumByCategory();
+    const categoriesToCreate = Object.keys(fixedMap).filter(cat => (current[cat] == null));
+    if (!categoriesToCreate.length) { this.defaultsSynced = true; return; }
+    this.categoriesApi.list().subscribe(list => {
+      const catalog = list || [];
+      let pending = 0;
+      for (const name of categoriesToCreate) {
+        const sum = fixedMap[name];
+        const cat = catalog.find(c => c.name === name);
+        if (!cat || !Number.isFinite(sum) || sum <= 0) continue;
+        pending++;
+        this.budgetsApi.upsert(cat.id, this.monthKey, sum).subscribe({
+          next: () => {
+            pending--;
+            if (pending === 0) {
+              this.defaultsSynced = true;
+              this.lastInfo.set('Presupuestos inicializados desde gastos fijos.');
+              this.refreshBudgets();
+            }
+          },
+          error: () => {
+            pending--;
+            this.lastError.set('No se pudo inicializar presupuesto por fijos.');
+          }
+        });
+      }
+      if (pending === 0) this.defaultsSynced = true;
+    });
   }
 }

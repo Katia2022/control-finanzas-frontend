@@ -2,6 +2,7 @@ package com.finanzas.categories;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,35 +11,29 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
+@RequiredArgsConstructor
 public class CategoryController {
-    private final CategoryRepository repo;
-    public CategoryController(CategoryRepository repo) { this.repo = repo; }
+    private final CategoryService service;
 
     static class Body { @NotBlank public String name; }
 
     @GetMapping
-    public List<Category> list() { return repo.findAll(); }
+    public List<Category> list() { return service.list(); }
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody Body body) {
-        if (repo.existsByNameIgnoreCase(body.name)) return ResponseEntity.status(409).body(problem(409, "Category exists"));
-        Category c = new Category(); c.setName(body.name.trim()); repo.save(c);
+        Category c = service.create(body.name);
         return ResponseEntity.created(URI.create("/api/v1/categories/" + c.getId())).body(c);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> rename(@PathVariable Long id, @Valid @RequestBody Body body) {
-        return repo.findById(id).<ResponseEntity<?>>map(c -> { c.setName(body.name.trim()); repo.save(c); return ResponseEntity.ok(c); })
-                .orElseGet(() -> ResponseEntity.status(404).body(problem(404, "Not found")));
+        return ResponseEntity.ok(service.rename(id, body.name));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (!repo.existsById(id)) return ResponseEntity.status(404).body(problem(404, "Not found"));
-        repo.deleteById(id); return ResponseEntity.noContent().build();
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
-
-    private static Problem problem(int status, String title) { var p = new Problem(); p.status = status; p.title = title; return p; }
-    static class Problem { public String type; public String title; public Integer status; public String detail; public String instance; }
 }
-

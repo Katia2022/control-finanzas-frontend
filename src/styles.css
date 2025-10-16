@@ -1,5 +1,23 @@
 /* Global shared styles */
 
+/* Typography baseline */
+html { font-size: 16px; }
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+  color: #111827;
+  background: #ffffff;
+}
+h1, h2, h3 { line-height: 1.2; margin: 0.2rem 0 0.6rem; color: #0f172a; }
+h1 { font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem); font-weight: 700; }
+h2 { font-size: clamp(1.25rem, 1rem + 1vw, 1.5rem); font-weight: 600; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+
+/* Spacing utilities */
+.sp-sm { gap: 0.5rem; }
+.sp-md { gap: 0.75rem; }
+.sp-lg { gap: 1rem; }
+
 /* Card container pattern shared across components */
 .card {
   background: #ffffff;
@@ -21,6 +39,149 @@
   color: #6b7280;
 }
 
+/* PrimeNG - force light card background */
+.p-card {
+  background: #ffffff !important;
+  color: #1f2937 !important; /* force readable dark text */
+}
+.p-card .p-card-content { padding: 1rem; }
+.p-card .p-card-header { padding: .5rem 1rem; }
+.p-card .p-card-title { font-size: 1.15rem; font-weight: 600; }
+
+/* Ensure text inside info highlights is readable */
+.p-card .highlights strong {
+  color: #111827;
+}
+
+/* PrimeNG - improve contrast for common components */
+/* Tag: keep readable base, preserve severity variants */
+.p-tag {
+  background: #eef2ff; /* light indigo */
+  color: #1f2937;      /* slate-800 */
+}
+.p-tag.p-tag-info,
+.p-tag.p-tag-warning,
+.p-tag.p-tag-danger {
+  color: #ffffff; /* readable on colored severities */
+}
+
+/* Success tag: light green background with dark green text for contrast */
+.p-tag.p-tag-success {
+  background: #dcfce7 !important; /* emerald-100 */
+  color: #065f46 !important;      /* emerald-700 */
+  border-color: #86efac !important; /* emerald-300, if theme uses borders */
+}
+
+/* Danger tag: light red background with dark red text */
+.p-tag.p-tag-danger {
+  background: #fee2e2 !important; /* red-100 */
+  color: #991b1b !important;      /* red-800 */
+  border-color: #fecaca !important; /* red-200 */
+}
+
+/* Warning tag: light amber background with dark amber text */
+.p-tag.p-tag-warning {
+  background: #fef3c7 !important; /* amber-100 */
+  color: #92400e !important;      /* amber-800 */
+  border-color: #fde68a !important; /* amber-300 */
+}
+
+/* Info tag: light blue background with dark blue text */
+.p-tag.p-tag-info {
+  background: #dbeafe !important; /* blue-100 */
+  color: #1e40af !important;      /* blue-800 */
+  border-color: #93c5fd !important; /* blue-300 */
+}
+
+/* Chip: subtle background and dark text */
+.p-chip {
+  background: #f3f4f6; /* gray-100 */
+  color: #111827;      /* gray-900 */
+  border-color: #e5e7eb;
+}
+
+/* Panel: light surface and readable headings */
+.p-panel,
+.p-panel .p-panel-content,
+.p-panel .p-panel-header {
+  background: #ffffff;
+  color: #1f2937;
+}
+.p-panel .p-panel-header .p-panel-title {
+  color: #111827;
+}
+
+/* Toast message text contrast */
+.p-toast .p-toast-message .p-toast-message-text {
+  color: #111827;
+}
+
+/* PrimeNG inputs - light background and subtle borders */
+.p-inputtext,
+.p-inputnumber .p-inputtext,
+.p-datepicker .p-inputtext,
+.p-select .p-select-label,
+.p-select .p-select-dropdown {
+  background: #ffffff !important;
+  color: #111827;
+}
+.p-inputtext::placeholder,
+.p-inputnumber .p-inputtext::placeholder,
+.p-datepicker .p-inputtext::placeholder {
+  color: #9ca3af;
+}
+.p-select .p-select-label.p-placeholder { color: #9ca3af; }
+.p-inputtext,
+.p-inputnumber .p-inputtext,
+.p-datepicker .p-inputtext,
+.p-select {
+  border-color: #e5e7eb;
+}
+.p-button.p-button-text,
+.p-button.p-button-link {
+  color: #111827 !important;
+}
+.p-button.p-button-text:hover,
+.p-button.p-button-link:hover {
+  background: #f3f4f6 !important;
+}
+:root .p-select-panel,
+:root .p-select-list,
+:root .p-select-option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+:root .p-select-option.p-highlight {
+  background: #eef2ff !important;
+  color: #111827 !important;
+}
+.p-inputtext:focus,
+.p-inputnumber .p-inputtext:focus,
+.p-datepicker .p-inputtext:focus,
+.p-select:focus-within {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  border-color: #2563eb;
+}
+
+/* (removed custom table overrides to use PrimeNG theme defaults) */
+
 @media (max-width: 720px) {
   .card { padding: 1.75rem; }
+}
+
+/* Global: PrimeNG buttons inside forms should not stretch and align right */
+form .p-button {
+  width: auto !important;
+  max-width: max-content;
+}
+/* For flex-column form containers using .form utility, align buttons to end */
+.form .p-button {
+  align-self: flex-end;
+}
+
+/* Small action button style shared (used in Movimientos y Ahorro) */
+.p-button.btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
 }

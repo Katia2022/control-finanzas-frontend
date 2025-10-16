@@ -1,16 +1,13 @@
-<article class="card insight-card">
+<p-card>
   <ul class="highlights">
-    <li>
+    <li class="row" pTooltip="Periodo con mayor balance de ingresos." tooltipPosition="top">
       <span class="highlights__label">Mes con mayor ingreso</span>
-      <strong>
-        {{ topMonthLabel || 'Sin registros' }}
-      </strong>
+      <strong>{{ topMonthLabel || 'Sin registros' }}</strong>
     </li>
-    <li>
+    <li class="row" pTooltip="Categoría con mayor gasto acumulado en el periodo actual." tooltipPosition="top">
       <span class="highlights__label">Categoría con más gasto</span>
       <strong>{{ topExpenseCategory || 'Sin datos' }}</strong>
     </li>
   </ul>
-  <p class="insight">{{ insight }}</p>
-</article>
-
+  <p class="insight" pTooltip="Sugerencia basada en tus movimientos recientes." tooltipPosition="bottom">{{ insight }}</p>
+</p-card>

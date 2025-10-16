@@ -1,19 +1,19 @@
 import { Routes } from '@angular/router';
-import { ResumenPageComponent } from './pages/resumen-page/resumen-page.component';
-import { MovimientosPageComponent } from './pages/movimientos-page/movimientos-page.component';
-import { CategoriasPageComponent } from './pages/categorias-page/categorias-page.component';
-import { PresupuestoPageComponent } from './pages/presupuesto-page/presupuesto-page.component';
-import { CuentasPageComponent } from './pages/cuentas-page/cuentas-page.component';
-import { ConfiguracionPageComponent } from './pages/configuracion-page/configuracion-page.component';
-import { SavingsPageComponent } from './pages/ahorro-page/savings-page.component';
+import { SummaryPageComponent } from './pages/summary-page/summary-page.component';
+import { TransactionsPageComponent } from './pages/transactions-page/transactions-page.component';
+import { CategoriesPageComponent } from './pages/categories-page/categories-page.component';
+import { BudgetPageComponent } from './pages/budget-page/budget-page.component';
+import { AccountsPageComponent } from './pages/accounts-page/accounts-page.component';
+import { SettingsPageComponent } from './pages/settings-page/settings-page.component';
+import { SavingsPageComponent } from './pages/savings-page/savings-page.component';
 
 export const routes: Routes = [
-  { path: '', component: ResumenPageComponent },
-  { path: 'movimientos', component: MovimientosPageComponent },
-  { path: 'categorias', component: CategoriasPageComponent },
-  { path: 'cuentas', component: CuentasPageComponent },
-  { path: 'presupuesto', component: PresupuestoPageComponent },
+  { path: '', component: SummaryPageComponent },
+  { path: 'movimientos', component: TransactionsPageComponent },
+  { path: 'categorias', component: CategoriesPageComponent },
+  { path: 'cuentas', component: AccountsPageComponent },
+  { path: 'presupuesto', component: BudgetPageComponent },
   { path: 'ahorro', component: SavingsPageComponent },
-  { path: 'configuracion', component: ConfiguracionPageComponent },
+  { path: 'configuracion', component: SettingsPageComponent },
   { path: '**', redirectTo: '' },
 ];

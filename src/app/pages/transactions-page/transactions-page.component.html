@@ -1,0 +1,71 @@
+<section class="grid">
+
+  <div class="full-width">
+    <app-transactions-table
+      #txTable
+      [transactions]="filteredTransactions"
+      [currencyCode]="transactionService.currencyCode()"
+      [accounts]="operatingAccountNames"
+      [categories]="categoriesSvc.categories()"
+      [filterControl]="filterAccount"
+      (editTx)="onEdit($event)"
+      (updateTx)="transactionService.updateTransaction($event.id, $event.data)"
+      (remove)="transactionService.removeTransaction($event)"
+    >
+      <div table-actions style="display:flex; gap:.5rem;">
+        <button pButton type="button" label="Registrar" icon="pi pi-plus" class="btn-sm" (click)="showRegister.set(true)"></button>
+        <button pButton type="button" label="Importar" icon="pi pi-upload" class="btn-sm" (click)="showImport.set(true)"></button>
+        <button pButton type="button" label="Exportar" icon="pi pi-download" class="btn-sm" (click)="prepareExport(txTable.visibleRows())"></button>
+      </div>
+    </app-transactions-table>
+  </div>
+
+  <p-dialog
+    header="Registrar movimiento"
+    [visible]="showRegister()"
+    (visibleChange)="showRegister.set($event)"
+    [modal]="true"
+    [dismissableMask]="true"
+    [style]="{ width: '720px', maxWidth: '95vw' }"
+  >
+    <app-transaction-form
+      [form]="form"
+      [categories]="categoriesSvc.categories()"
+      [accounts]="operatingAccountNames"
+      [fixedNames]="fixedNamesForSelectedCategory"
+      [editing]="isEditing"
+      (cancel)="cancelEdit()"
+      (submitted)="submit()"
+    />
+    <div style="display:flex; align-items:center; gap:.5rem; margin-top:.5rem;">
+      <p-checkbox inputId="closeAfter" [binary]="true" [ngModel]="closeAfterSave()" (ngModelChange)="closeAfterSave.set($event)"></p-checkbox>
+      <label for="closeAfter">Cerrar al guardar</label>
+    </div>
+  </p-dialog>
+
+  <p-dialog
+    header="Importar movimientos"
+    [visible]="showImport()"
+    (visibleChange)="showImport.set($event)"
+    [modal]="true"
+    [dismissableMask]="true"
+    [style]="{ width: '720px', maxWidth: '95vw' }"
+  >
+    <app-transactions-import
+      [accounts]="operatingAccountNames"
+      [categories]="categoriesSvc.categories()"
+      (importRows)="importRows($event)"
+    ></app-transactions-import>
+  </p-dialog>
+
+  <p-dialog
+    header="Exportar movimientos"
+    [visible]="showExport()"
+    (visibleChange)="showExport.set($event)"
+    [modal]="true"
+    [dismissableMask]="true"
+    [style]="{ width: '720px', maxWidth: '95vw' }"
+  >
+    <app-transactions-export [transactions]="exportRows"></app-transactions-export>
+  </p-dialog>
+</section>

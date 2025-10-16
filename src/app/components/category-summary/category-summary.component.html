@@ -1,16 +1,50 @@
-<article class="card summaries-card">
-  <header class="card__header">
-    <h2>Gasto por categoría</h2>
-    <p>Principales categorías de gasto.</p>
-  </header>
+<p-card header="Gasto por categoría" subheader="Principales categorías de gasto.">
   @if (expenseByCategory.length) {
-    <ul class="category-list">
-      <li *ngFor="let item of expenseByCategory">
-        <span>{{ item.category }}</span>
-        <strong>{{ item.amount | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
-      </li>
-    </ul>
+  <div class="toolbar">
+    <button
+      pButton
+      type="button"
+      [text]="true"
+      icon="pi pi-list"
+      (click)="showAll = !showAll"
+      [label]="showAll ? 'Ver top 5' : 'Ver todo'"
+    ></button>
+  </div>
+
+  <p-table
+    [value]="visible"
+    dataKey="category"
+    styleClass="cat-table"
+    [tableStyle]="{ width: '100%' }"
+  >
+    <ng-template #header>
+      <tr>
+        <th>Categoría</th>
+        <th class="amount">Gasto</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-row>
+      <tr>
+        <td>
+          <div class="row">
+            <span class="name">{{ row.category }}</span>
+            <p-progressBar
+              [value]="percent(row.amount)"
+              [showValue]="false"
+              styleClass="mini-bar"
+            ></p-progressBar>
+          </div>
+        </td>
+        <td class="amount">
+          <span class="amount-chip">{{
+            row.amount | currency : currencyCode : 'symbol-narrow' : '1.2'
+          }}</span>
+          <span class="pct">({{ percent(row.amount) }}%)</span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
   } @else {
-    <p class="empty">Aún no registras gastos.</p>
+  <p class="empty">Aún no registras gastos.</p>
   }
-</article>
+</p-card>

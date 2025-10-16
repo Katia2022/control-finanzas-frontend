@@ -1,0 +1,54 @@
+.savings { display: grid; gap: 16px; }
+.savings__header { display: grid; gap: 8px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpis > div { background: #f5f5f5; padding: 12px; border-radius: 8px; }
+.kpis .label { display: block; opacity: .8; font-size: .85rem; margin-bottom: 4px; }
+.card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; }
+.card__header { display: flex; justify-content: space-between; align-items: center; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(160px, 1fr)); align-items: end; }
+.savings-form {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.date-compact {
+  width: 100%;
+}
+/* Ensure PrimeNG dropdown with date-compact fills cell and doesn't resize on selection */
+:host ::ng-deep .date-compact.p-dropdown { width: 100% !important; }
+:host ::ng-deep .date-compact .p-dropdown-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 760px) {
+  .savings-form { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+label { display: grid; gap: 4px; font-size: .9rem; }
+.grid input.p-inputtext {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+.grid input.p-inputtext::placeholder { color: #9ca3af; }
+
+/* Make inputs/selects fill their grid cell, similar to Movimientos */
+.grid .p-select,
+.grid .p-inputnumber,
+.grid input.p-inputtext { width: 100%; }
+
+/* Place the actions row at the end, full width, right-aligned */
+.grid .actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+}
+.actions { display: flex; align-items: end; }
+/* PrimeNG buttons: ensure visible styles and compact size option */
+:host ::ng-deep .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.875rem; }
+button.danger { border-color: #fecaca; color: #b91c1c; }
+/* Remove custom table cell overrides to rely on PrimeNG theme defaults */
+/* Check icon for DONE */
+.done-icon { color: #16a34a; font-size: 1.1rem; align-self: center; }
+.empty { text-align: center; opacity: .7; padding: 12px; }
+/* inline error/info removed; using toasts */
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}

@@ -1,13 +1,26 @@
 {
   "name": "control-finanzas-frontend",
   "version": "0.0.0",
+  "productName": "Control Finanzas",
+  "main": "electron/main.js",
+  "description": "Aplicación de escritorio para control de finanzas personales (Angular + Electron)",
+  "author": "Control Finanzas",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "export:openapi": "powershell -ExecutionPolicy Bypass -File ./server/scripts/export-openapi.ps1"
+    "export:openapi": "powershell -ExecutionPolicy Bypass -File ./server/scripts/export-openapi.ps1",
+    "electron:dev": "cross-env ELECTRON_START_URL=http://localhost:4200 concurrently \"npm:start\" \"wait-on http://localhost:4200 && electron .\"",
+    "electron:build": "npm run build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false SZA_NO_SYMLINKS=1 electron-builder -w",
+    "electron:pack": "npm run build && electron-packager . \"Control Finanzas\" --platform=win32 --arch=x64 --out=release --overwrite --icon=public\\app.ico --no-asar --prune=true --tmpdir=..\\__tmp_electron",
+    "build:backend": "mvn -f server/pom.xml -DskipTests package spring-boot:repackage",
+    "prep:backend": "node scripts/copy-backend.js",
+    "pack:all": "npm run build:backend && npm run prep:backend && npm run electron:pack",
+    "installer:win": "node scripts/create-installer.js",
+    "installer:nsis": "npm run build && npm run prep:backend && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false SZA_NO_SYMLINKS=1 electron-builder -w",
+    "format": "prettier --write \"src/**/*.{ts,html,css}\""
   },
   "prettier": {
     "printWidth": 100,
@@ -22,28 +35,78 @@
     ]
   },
   "private": true,
+  "build": {
+    "appId": "com.controlfinanzas.app",
+    "directories": {
+      "output": "release"
+    },
+    "asar": true,
+    "asarUnpack": [
+      "electron/backend/**",
+      "public/**"
+    ],
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "win": {
+      "icon": "public/app.ico",
+      "sign": false,
+      "signAndEditExecutable": false,
+      "publisherName": [],
+      "signingHashAlgorithms": [],
+      "certificateFile": null,
+      "certificateSubjectName": null,
+      "rfc3161TimeStampServer": null,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "${productName}-Setup-${version}.exe"
+    }
+  },
   "dependencies": {
-    "@angular/common": "^20.3.0",
-    "@angular/compiler": "^20.3.0",
-    "@angular/core": "^20.3.0",
-    "@angular/forms": "^20.3.0",
-    "@angular/platform-browser": "^20.3.0",
-    "@angular/router": "^20.3.0",
+    "@angular/animations": "^20.3.3",
+    "@angular/common": "^20.3.3",
+    "@angular/compiler": "^20.3.3",
+    "@angular/core": "^20.3.3",
+    "@angular/forms": "^20.3.3",
+    "@angular/platform-browser": "^20.3.3",
+    "@angular/router": "^20.3.3",
+    "@primeng/themes": "^20.2.0",
+    "primeicons": "^7.0.0",
+    "primeng": "^20.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "xlsx": "^0.18.5",
+    "zone.js": "~0.15.0",
+    "@ngneat/elf": "^2.3.2"
   },
   "devDependencies": {
     "@angular/build": "^20.3.3",
     "@angular/cli": "^20.3.3",
-    "@angular/compiler-cli": "^20.3.0",
+    "@angular/compiler-cli": "^20.3.3",
+    "@angular/language-service": "^20.3.3",
     "@types/jasmine": "~5.1.0",
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "electron": "^32.2.0",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2",
+    "electron-winstaller": "^5.4.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "wait-on": "^8.0.3"
   }
 }

@@ -1,87 +1,335 @@
-<article class="card">
-  <header class="card__header">
-    <h2>Presupuesto</h2>
-    <p>Planifica gastos fijos y por categoría (mensual).</p>
-  </header>
-
+<p-card header="Presupuesto" subheader="Planifica gastos fijos y por categoría (mensual).">
   <section class="card__section">
     <h3>Resumen mensual</h3>
-    <div class="summary">
+    <div class="summary"><div class="summary-row plan">
       <div>
         <small>Presupuesto total</small>
-        <strong>{{ totalBudget() | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+        <strong>{{ totalBudget() | currency : currencyCode : 'symbol-narrow' : '1.2' }}</strong>
+      </div>
+      <div
+        pTooltip="Capacidad máxima para planificar este periodo: Saldos iniciales (operativas) + Ingresos (operativas) − Ahorro neto."
+        tooltipPosition="top"
+      >
+        <small>Tope planificable</small>
+        <strong>{{
+          planningCapValue() | currency : currencyCode : 'symbol-narrow' : '1.2'
+        }}</strong>
+      </div>
+      <div
+        pTooltip="Por planificar = Tope planificable − Presupuesto total.
+Si es negativo, has planificado por encima del tope."
+        tooltipPosition="top"
+      >
+        <small>Por planificar</small>
+        <ng-container *ngIf="remainingToPlan() < 0; else planOk">
+          <p-tag
+            severity="danger"
+            [value]="(remainingToPlan() | currency : currencyCode : 'symbol-narrow' : '1.2') || ''"
+          ></p-tag>
+        </ng-container>
+        <ng-template #planOk>
+          <strong>{{
+            remainingToPlan() | currency : currencyCode : 'symbol-narrow' : '1.2'
+          }}</strong>
+        </ng-template>
+      </div>
+      </div>
+      <div class="summary-row exec">
+        <div>
+        <small>Fijos</small>
+        <strong>{{
+          totalFixedThisMonth() | currency : currencyCode : 'symbol-narrow' : '1.2'
+        }}</strong>
       </div>
       <div>
         <small>Gastado</small>
-        <strong>{{ totalSpentThisMonth() | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+        <strong>{{
+          totalSpentThisMonth() | currency : currencyCode : 'symbol-narrow' : '1.2'
+        }}</strong>
       </div>
-      <div [class.negative]="totalSpentThisMonth() > totalBudget()">
-        <small>Restante</small>
-        <strong>{{ (totalBudget() - totalSpentThisMonth()) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
+      <div
+        pTooltip="Presupuesto total − Gastado del periodo (solo cuentas operativas; excluye ahorro y transferencias)."
+        tooltipPosition="top"
+      >
+        <small>Restante según plan</small>
+        <ng-container *ngIf="remainingPlanned() < 0; else remainingPlannedOk">
+          <p-tag
+            severity="danger"
+            [value]="(remainingPlanned() | currency : currencyCode : 'symbol-narrow' : '1.2') || ''"
+          ></p-tag>
+        </ng-container>
+        <ng-template #remainingPlannedOk>
+          <strong>{{
+            remainingPlanned() | currency : currencyCode : 'symbol-narrow' : '1.2'
+          }}</strong>
+        </ng-template>
+      </div>
+      <div
+        pTooltip="Tope planificable − Gastado del periodo. Tope = Saldos iniciales (operativas) + Ingresos (operativas) − Ahorro neto."
+        tooltipPosition="top"
+      >
+        <small>Restante real</small>
+        <ng-container *ngIf="remainingReal() < 0; else remainingRealOk">
+          <p-tag
+            severity="danger"
+            [value]="(remainingReal() | currency : currencyCode : 'symbol-narrow' : '1.2') || ''"
+          ></p-tag>
+        </ng-container>
+        <ng-template #remainingRealOk>
+          <strong>{{ remainingReal() | currency : currencyCode : 'symbol-narrow' : '1.2' }}</strong>
+        </ng-template>
+      </div>
       </div>
     </div>
-    <div class="progress">
-      <div class="bar" [style.width.%]="percentSpent()"></div>
-    </div>
+    <p-progressBar [value]="percentSpent()"></p-progressBar>
   </section>
+</p-card>
 
-  <section class="card__section">
-    <h3>Gastos fijos</h3>
-    <form class="row-add" [formGroup]="fixedForm" (ngSubmit)="addFixed()">
-      <input type="text" placeholder="Nombre" formControlName="name" />
-      <input type="number" placeholder="Monto" min="0" step="1" formControlName="amount" />
-      <select formControlName="category">
-        <option value="">(sin categoría)</option>
-        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-      </select>
-      <button class="button" type="submit">Añadir</button>
-    </form>
-    @if (fixedForm.touched && fixedForm.invalid) {
-      <div class="errors">
-        @if (fixedForm.get('name')?.touched && fixedForm.get('name')?.invalid) {
-          <small>Nombre requerido (máx. 40).</small>
-        }
-        @if (fixedForm.get('amount')?.touched && fixedForm.get('amount')?.invalid) {
-          <small>Monto requerido, mínimo 0.</small>
-        }
-      </div>
-    }
-    <ul class="list">
-      <li *ngFor="let fx of fixedExpenses()">
-        <span>{{ fx.name }}</span>
-        <strong>{{ fx.amount | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
-        <select [value]="fx.category || ''" (change)="updateFixedCategory(fx.id, ($any($event.target)).value)">
-          <option value="">(sin categoría)</option>
-          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-        </select>
-        <button class="link danger" type="button" (click)="removeFixed(fx.id)">Eliminar</button>
-      </li>
-    </ul>
-  </section>
+<details>
+  <summary style="cursor: pointer; font-weight: 600; margin: 0.75rem 0">Gastos fijos</summary>
+  <p-card header="Gastos fijos" subheader="Compromisos mensuales">
+    <section class="card__section">
+      <form class="row-add" [formGroup]="fixedForm" (ngSubmit)="addFixed()">
+        <input pInputText type="text" placeholder="Nombre" formControlName="name" />
+        <p-inputNumber
+          placeholder="Monto"
+          [min]="0"
+          [step]="1"
+          formControlName="amount"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+        ></p-inputNumber>
+        <p-select
+          formControlName="category"
+          [options]="categoryOptionsWithNone"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Categoría"
+        ></p-select>
+        <button
+          pButton
+          type="submit"
+          label="Añadir"
+          icon="pi pi-plus"
+          [disabled]="fixedForm.invalid"
+        ></button>
+      </form>
+      <ng-container *ngIf="fixedForm.touched && fixedForm.invalid">
+        <div class="errors">
+          <ng-container *ngIf="fixedForm.get('name')?.touched && fixedForm.get('name')?.invalid">
+            <small>Nombre requerido (máx. 40).</small>
+          </ng-container>
+          <ng-container
+            *ngIf="fixedForm.get('amount')?.touched && fixedForm.get('amount')?.invalid"
+          >
+            <small>Monto requerido, mínimo 0.</small>
+          </ng-container>
+        </div>
+      </ng-container>
 
-  <section class="card__section">
-    <h3>Presupuesto por categoría (mes actual)</h3>
-    <ul class="list list-cat">
-      <li *ngFor="let cat of categories">
-        <span class="name">{{ cat }}</span>
-        <div class="budget-input">
-          <input type="number" min="0" step="1"
-                 [value]="getBudget(cat)"
-                 (input)="updateCategoryBudget(cat, ($any($event.target)).valueAsNumber)" />
-          <small>Presupuesto</small>
-        </div>
-        <div class="spent">
-          <strong>{{ getSpent(cat) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
-          <small>Gastado</small>
-        </div>
-        <div class="remaining" [class.negative]="getBudget(cat) - getSpent(cat) < 0">
-          <strong>{{ (getBudget(cat) - getSpent(cat)) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
-          <small>Restante</small>
-        </div>
-        @if (getBudget(cat) != null) {
-          <button class="link" type="button" (click)="removeCategoryBudget(cat)">Quitar</button>
-        }
-      </li>
-    </ul>
-  </section>
-</article>
+      <p-table
+        [value]="fixedExpenses()"
+        [responsiveLayout]="'scroll'"
+        [scrollable]="true"
+        [scrollHeight]="'460px'"
+        [tableStyle]="{ 'min-width': '640px' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Nombre</th>
+            <th style="width: 140px; text-align: right">Monto</th>
+            <th style="width: 220px">Categoría</th>
+            <th style="width: 120px">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>
+              <ng-container *ngIf="editingId !== row.id; else nameEdit">{{
+                row.name
+              }}</ng-container>
+              <ng-template #nameEdit>
+                <input pInputText type="text" [(ngModel)]="editName" />
+              </ng-template>
+            </td>
+            <td style="text-align: right">
+              <ng-container *ngIf="editingId !== row.id; else amountEdit">{{
+                row.amount | currency : currencyCode : 'symbol-narrow' : '1.2-2'
+              }}</ng-container>
+              <ng-template #amountEdit>
+                <p-inputNumber
+                  [(ngModel)]="editAmount"
+                  [min]="0"
+                  [step]="1"
+                  [minFractionDigits]="0"
+                  [maxFractionDigits]="2"
+                ></p-inputNumber>
+              </ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="editingId !== row.id; else catEdit">{{
+                row.category || '(sin categoría)'
+              }}</ng-container>
+              <ng-template #catEdit>
+                <p-select
+                  [ngModel]="row.category || ''"
+                  (ngModelChange)="updateFixedCategory(row.id, $event)"
+                  [options]="categoryOptionsWithNone"
+                  optionLabel="label"
+                  optionValue="value"
+                ></p-select>
+              </ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="editingId !== row.id; else editActions">
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-pencil"
+                  (click)="startEdit(row)"
+                ></button>
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  (click)="removeFixed(row.id)"
+                ></button>
+              </ng-container>
+              <ng-template #editActions>
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-check"
+                  (click)="saveEdit(row.id)"
+                  [disabled]="
+                    !(editName && editName.trim().length) ||
+                    !(editAmount != null && editAmount >= 0)
+                  "
+                ></button>
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-times"
+                  (click)="cancelEdit()"
+                ></button>
+              </ng-template>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </p-card>
+</details>
+
+<details>
+  <summary style="cursor: pointer; font-weight: 600; margin: 0.75rem 0">
+    Presupuesto por categoría
+  </summary>
+  <p-card header="Presupuesto por categoría" subheader="Mes actual">
+    <section class="card__section">
+      <p-table
+        [value]="categories"
+        [responsiveLayout]="'scroll'"
+        [scrollable]="true"
+        [scrollHeight]="'460px'"
+        [tableStyle]="{ 'min-width': '820px' }"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Categoría</th>
+            <th style="width: 140px; text-align: right">Presupuesto</th>
+            <th style="width: 120px; text-align: right">Fijo</th>
+            <th style="width: 120px; text-align: right">Variable</th>
+            <th style="width: 120px; text-align: right">Gastado</th>
+            <th style="width: 150px; text-align: right">Restante</th>
+            <th style="width: 120px">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-cat>
+          <tr>
+            <td>{{ cat }}</td>
+            <td style="text-align: right">
+              <ng-container *ngIf="editingCategory !== cat; else budgetEdit">{{
+                getBudget(cat) | currency : currencyCode : 'symbol-narrow' : '1.2-2'
+              }}</ng-container>
+              <ng-template #budgetEdit>
+                <p-inputNumber
+                  [min]="0"
+                  [step]="1"
+                  [(ngModel)]="tempBudget"
+                  [minFractionDigits]="0"
+                  [maxFractionDigits]="0"
+                ></p-inputNumber>
+              </ng-template>
+            </td>
+            <td style="text-align: right">
+              {{ getFixed(cat) | currency : currencyCode : 'symbol-narrow' : '1.2' }}
+            </td>
+            <td style="text-align: right">
+              {{ getVariableBudget(cat) | currency : currencyCode : 'symbol-narrow' : '1.2' }}
+            </td>
+            <td style="text-align: right">
+              {{ getSpent(cat) | currency : currencyCode : 'symbol-narrow' : '1.2' }}
+            </td>
+            <td style="text-align: right">
+              <ng-container *ngIf="getRemainingTotal(cat) < 0; else remOk">
+                <p-tag
+                  severity="danger"
+                  [value]="
+                    (getRemainingTotal(cat) | currency : currencyCode : 'symbol-narrow' : '1.2') ||
+                    ''
+                  "
+                ></p-tag>
+              </ng-container>
+              <ng-template #remOk>
+                {{ getRemainingTotal(cat) | currency : currencyCode : 'symbol-narrow' : '1.2' }}
+              </ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="editingCategory !== cat; else catEditActions">
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-pencil"
+                  (click)="startEditCategory(cat)"
+                ></button>
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-times"
+                  (click)="removeCategoryBudget(cat)"
+                  [disabled]="getBudget(cat) == null"
+                ></button>
+              </ng-container>
+              <ng-template #catEditActions>
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-check"
+                  (click)="saveEditCategory(cat)"
+                  [disabled]="!(tempBudget != null && tempBudget >= 0)"
+                ></button>
+                <button
+                  pButton
+                  [text]="true"
+                  type="button"
+                  icon="pi pi-times"
+                  (click)="cancelEditCategory()"
+                ></button>
+              </ng-template>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </p-card>
+</details>
+

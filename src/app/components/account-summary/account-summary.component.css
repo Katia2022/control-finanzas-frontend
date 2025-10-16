@@ -1,5 +1,11 @@
 /* Grid of per-account summary cards */
-.account-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
 
 .account-card {
   background: #f9fafb;
@@ -9,17 +15,50 @@
   display: flex;
   flex-direction: column;
   gap: .75rem;
+  height: 100%;
 }
 
 .account-card__name { margin: 0; font-size: 1rem; color: #111827; }
 .account-card__balance { margin: 0; font-weight: 700; font-size: 1.25rem; }
 
-.account-card__totals { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin: 0; }
-.account-card__totals div { background: #ffffff; border: 1px solid #e5e7eb; border-radius: .75rem; padding: .5rem .75rem; }
-.account-card__totals dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; }
-.account-card__totals dd { margin: .25rem 0 0; font-weight: 600; }
+.account-card__totals {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: nowrap;
+}
+
+.account-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: .75rem;
+  padding: .5rem .75rem;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.account-pill .label { color: #111827; }
+.account-pill .value { font-weight: 600; }
 
 .income { color: #0b6b2b; }
 .expense { color: #b00020; }
 .positive { color: #0b6b2b; }
 .negative { color: #b00020; }
+.account-card__header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: .75rem;
+}
+
+.account-card__header .p-tag { justify-self: end; }
+
+.account-card__name { margin: 0; font-size: 1rem; color: #111827; }
+.account-card__balance { margin: 0; font-weight: 700; font-size: 1.25rem; }
+
+/* Make inner body fill height for consistent cards */
+:host ::ng-deep .account-card .p-card-body { display: flex; flex-direction: column; height: 100%; }

@@ -1,57 +1,219 @@
-<article class="card table-card">
-  <header class="card__header">
-    <div class="header-top">
-      <div>
-        <h2>Movimientos recientes</h2>
-        <p>Organizados del más nuevo al más antiguo.</p>
-      </div>
-      <div class="table-filter" *ngIf="filterControl">
-        <label class="filter-label">
-          <span>Filtrar por cuenta:</span>
-          <input type="text" [formControl]="filterControl" placeholder="Todas" list="accounts-filter-list" />
-        </label>
-        <datalist id="accounts-filter-list">
-          <option *ngFor="let a of accounts" [value]="a"></option>
-        </datalist>
-      </div>
-    </div>
-  </header>
+<p-card>
+  <ng-template #header>
+    <div class="actions">
+    <ng-content select="[table-actions]"></ng-content>
+  </div>
+  </ng-template>
+  
+  <ng-template #title>Movimientos recientes</ng-template>
+  <ng-template #subtitle> Organizados del más nuevo al más antiguo. </ng-template>
+  
   @if (transactions.length) {
-    <div class="table-wrapper">
-      <table>
-      <thead>
-        <tr>
-          <th scope="col">Fecha</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Categoría</th>
-          <th scope="col">Cuenta</th>
-          <th scope="col">Descripción</th>
-          <th scope="col" class="amount">Monto</th>
-          <th scope="col" class="actions">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let transaction of transactions; trackBy: trackById">
-          <td>{{ transaction.date | date: 'dd/MM/yyyy' }}</td>
-          <td>
-            <span class="badge" [class.badge--income]="transaction.type === 'income'" [class.badge--expense]="transaction.type === 'expense'">
-              {{ transaction.type === 'income' ? 'Ingreso' : 'Gasto' }}
-            </span>
-          </td>
-          <td>{{ transaction.category }}</td>
-          <td>{{ transaction.account }}</td>
-          <td>{{ transaction.description || '—' }}</td>
-          <td class="amount" [class.positive]="transaction.type === 'income'" [class.negative]="transaction.type === 'expense'">
-            {{ transaction.amount | currency: currencyCode : 'symbol-narrow' : '1.2-2' }}
-          </td>
-          <td class="actions">
-            <button type="button" class="link" (click)="remove.emit(transaction.id)">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-      </table>
-    </div>
+  <p-table
+    #dt
+    stripedRows
+    dataKey="id"
+    [value]="transactions"
+    [tableStyle]="{ width: '560px', 'table-layout': 'fixed' }"
+    [scrollable]="true"
+    scrollHeight="500px"
+    [globalFilterFields]="['date', 'type', 'category', 'account', 'description', 'amount']"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [paginator]="true"
+    [rows]="5"
+  >
+    <ng-template #caption>
+      <div class="table-toolbar">
+        <p-button label="Limpiar" [outlined]="true" icon="pi pi-filter-slash" (click)="clear(dt)" />
+        <p-iconfield iconPosition="left" class="ml-auto">
+          <p-inputicon>
+            <i class="pi pi-search"></i>
+          </p-inputicon>
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchValue"
+            (input)="dt.filterGlobal($event.target.value, 'contains')"
+            placeholder="Buscar en todos"
+          />
+        </p-iconfield>
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="date" style="width: 150px">
+          Fecha
+          <p-sortIcon field="date"></p-sortIcon>
+          <p-columnFilter field="date" display="menu" type="date"></p-columnFilter>
+        </th>
+        <th pSortableColumn="type" style="width: 150px">
+          Tipo
+          <p-sortIcon field="type"></p-sortIcon>
+          <p-columnFilter field="type" display="menu" type="text"></p-columnFilter>
+        </th>
+        <th pSortableColumn="category" style="width: 200px">
+          Categoría
+          <p-sortIcon field="category"></p-sortIcon>
+          <p-columnFilter field="category" display="menu" type="text"></p-columnFilter>
+        </th>
+        <th pSortableColumn="account" style="width: 150px">
+          Cuenta
+          <p-sortIcon field="account"></p-sortIcon>
+          <p-columnFilter field="account" display="menu" type="text"></p-columnFilter>
+        </th>
+        <th pSortableColumn="description" style="width: 200px">
+          Descripción
+          <p-sortIcon field="description"></p-sortIcon>
+          <p-columnFilter field="description" display="menu" type="text"></p-columnFilter>
+        </th>
+        <th pSortableColumn="amount" class="amount" style="width: 150px">
+          Monto
+          <p-sortIcon field="amount"></p-sortIcon>
+          <p-columnFilter field="amount" display="menu" type="numeric"></p-columnFilter>
+        </th>
+        <th class="row-actions" style="width: 145px">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-transaction>
+      <tr>
+        <td>
+          @if (editingId === transaction.id && draft) {
+          <p-datepicker
+            [(ngModel)]="draft.date"
+            [ngModelOptions]="{ standalone: true }"
+            dateFormat="yy-mm-dd"
+            [dataType]="'string'"
+            [showIcon]="true"
+            [appendTo]="'body'"
+            [inputStyleClass]="'inline-input'"
+            style="width: 100%"
+          />
+          } @else {
+          {{ transaction.date | date : 'dd/MM/yyyy' }}
+          }
+        </td>
+        <td>
+          @if (editingId === transaction.id && draft) {
+          <p-select
+            [(ngModel)]="draft.type"
+            [options]="[
+              { label: 'Ingreso', value: 'income' },
+              { label: 'Gasto', value: 'expense' }
+            ]"
+            optionLabel="label"
+            optionValue="value"
+          ></p-select>
+          } @else {
+          <p-tag
+            [severity]="transaction.type | txTypeSeverity"
+            [value]="transaction.type | txTypeLabel"
+          ></p-tag>
+          }
+        </td>
+        <td>
+          @if (editingId === transaction.id && draft) {
+          <p-select
+            [(ngModel)]="draft.category"
+            [options]="categoryOptions"
+            optionLabel="label"
+            optionValue="value"
+            [editable]="true"
+            [filter]="true"
+            [appendTo]="'body'"
+            [overlayOptions]="{ style: { 'max-height': '260px' } }"
+            [style]="{ width: '100%' }"
+          ></p-select>
+          } @else {
+          {{ transaction.category }}
+          }
+        </td>
+        <td>
+          @if (editingId === transaction.id && draft) {
+          <p-select
+            [(ngModel)]="draft.account"
+            [options]="accountOptions"
+            optionLabel="label"
+            optionValue="value"
+            [editable]="true"
+            [filter]="true"
+            [appendTo]="'body'"
+            [overlayOptions]="{ style: { 'max-height': '260px' } }"
+            [style]="{ width: '100%' }"
+          ></p-select>
+          } @else {
+          {{ transaction.account }}
+          }
+        </td>
+        <td>
+          @if (editingId === transaction.id && draft) {
+          <input
+            class="inline-input"
+            pInputText
+            type="text"
+            [value]="draft.description || ''"
+            (input)="draft.description = $any($event.target).value"
+          />
+          } @else {
+          {{ transaction.description || '—' }}
+          }
+        </td>
+        <td class="amount">
+          @if (editingId === transaction.id && draft) {
+          <p-inputNumber
+            [(ngModel)]="draft.amount"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0.01"
+            [inputStyleClass]="'inline-input amount-input'"
+          />
+          } @else {
+          <span
+            [class.positive]="transaction.type === 'income'"
+            [class.negative]="transaction.type === 'expense'"
+          >
+            {{ transaction.amount | currency : currencyCode : 'symbol-narrow' : '1.2-2' }}
+          </span>
+          }
+        </td>
+        <td class="row-actions">
+          @if (editingId === transaction.id) {
+          <button
+            pButton
+            type="button"
+            icon="pi pi-check"
+            [text]="true"
+            (click)="saveInlineEdit()"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-times"
+            [text]="true"
+            (click)="cancelInlineEdit()"
+          ></button>
+          } @else {
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            [text]="true"
+            (click)="startInlineEdit(transaction)"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-trash"
+            severity="danger"
+            [text]="true"
+            (click)="remove.emit(transaction.id)"
+          ></button>
+          }
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
   } @else {
-    <p class="empty">No hay movimientos registrados aún.</p>
+  <p class="empty">No hay movimientos registrados aún.</p>
   }
-</article>
+</p-card>

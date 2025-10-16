@@ -1,28 +1,39 @@
-<article class="card summaries-card">
-  <header class="card__header">
-    <h2>Resumen mensual</h2>
-    <p>Compara ingresos y gastos por mes.</p>
-  </header>
+<p-card header="Resumen mensual" subheader="Cuentas operativas por periodo (excluye transferencias internas)">
   @if (monthlySummaries.length) {
-    <ul class="monthly-list">
-      <li *ngFor="let month of monthlySummaries">
-        <div>
-          <p class="monthly-list__label">{{ month.label | titlecase }}</p>
-          <p class="monthly-list__detail">
-            Ingresos:
-            <strong>{{ month.income | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
-          </p>
-          <p class="monthly-list__detail">
-            Gastos:
-            <strong>{{ month.expense | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}</strong>
-          </p>
+  <ul class="monthly-list">
+    <li
+      *ngFor="let month of monthlySummaries"
+      style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem"
+    >
+      <div>
+        <p class="monthly-list__label">{{ month.label | titlecase }}</p>
+        <p class="monthly-list__range">
+          {{ rangeFor(month.key).start }} — {{ rangeFor(month.key).end }}
+        </p>
+        <div class="monthly-list__detail" pTooltip="Total de ingresos en cuentas operativas para este periodo." tooltipPosition="top">
+          Ingresos:
+          <strong>{{ month.income | currency : currencyCode : 'symbol-narrow' : '1.2-2' }}</strong>
         </div>
-        <div class="monthly-list__balance" [class.monthly-list__balance--positive]="month.income - month.expense >= 0">
-          {{ (month.income - month.expense) | currency: currencyCode : 'symbol-narrow' : '1.0-0' }}
+        <div class="monthly-list__detail" pTooltip="Total de gastos en cuentas operativas para este periodo." tooltipPosition="top">
+          Gastos:
+          <strong>{{ month.expense | currency : currencyCode : 'symbol-narrow' : '1.2-2' }}</strong>
         </div>
-      </li>
-    </ul>
+        <div class="monthly-list__detail" pTooltip="Ahorro neto del periodo: depósitos a ahorro − retiros." tooltipPosition="top">
+          Ahorro (neto):
+          <strong [ngClass]="(monthlySavingsByKey?.[month.key]||0) >= 0 ? 'pos' : 'neg'">
+            {{ (monthlySavingsByKey?.[month.key] || 0) | currency : currencyCode : 'symbol-narrow' : '1.2-2' }}
+          </strong>
+        </div>
+      </div>
+      <p-tag
+        pTooltip="Balance del periodo = Ingresos − Gastos"
+        tooltipPosition="left"
+        [severity]="month.income - month.expense >= 0 ? 'success' : 'danger'"
+        value="{{ month.income - month.expense | currency : currencyCode : 'symbol-narrow' : '1.2-2' }}"
+      ></p-tag>
+    </li>
+  </ul>
   } @else {
-    <p class="empty">Registra movimientos para generar el historial mensual.</p>
+  <p class="empty">Registra movimientos para generar el historial mensual.</p>
   }
-</article>
+</p-card>

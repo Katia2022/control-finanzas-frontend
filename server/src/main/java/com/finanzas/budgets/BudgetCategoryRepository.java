@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface BudgetCategoryRepository extends JpaRepository<BudgetCategory, Long> {
     List<BudgetCategory> findByMonthKey(String monthKey);
+    java.util.Optional<BudgetCategory> findByCategory_IdAndMonthKey(Long categoryId, String monthKey);
 }
-

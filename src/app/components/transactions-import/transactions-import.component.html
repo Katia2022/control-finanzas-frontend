@@ -1,0 +1,33 @@
+<p-card header="Importar movimientos" subheader="Sube un CSV y selecciona la cuenta destino.">
+  <div class="import__controls">
+    <input type="file" accept=".csv,.txt,.xlsx,.xls" (change)="onFileChange($event)" />
+    <p-select [(ngModel)]="accountModel" (ngModelChange)="selectedAccount.set($event)"
+              [options]="accountOptions"
+              optionLabel="label" optionValue="value" placeholder="Selecciona cuenta" [editable]="true"></p-select>
+    <p-select [(ngModel)]="categoryModel" (ngModelChange)="defaultCategory.set($event)"
+              [options]="categoryOptions"
+              optionLabel="label" optionValue="value" placeholder="Categoría (opcional)" [editable]="true"></p-select>
+    <button pButton type="button" label="Importar" icon="pi pi-upload" (click)="startImport()" [disabled]="!canImport()"></button>
+  </div>
+  <p class="hint">Formato soportado: CSV (UTF-8). Para Excel (.xlsx), exporta como CSV.</p>
+
+  <div class="preview" *ngIf="parsedPreview().length">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Cuenta</th><th>Descripción</th><th>Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of parsedPreview()">
+          <td>{{ r.date }}</td>
+          <td>{{ r.type === 'income' ? 'Ingreso' : 'Gasto' }}</td>
+          <td>{{ r.category || '—' }}</td>
+          <td>{{ r.account }}</td>
+          <td>{{ r.description || '—' }}</td>
+          <td class="amount">{{ r.amount | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</p-card>

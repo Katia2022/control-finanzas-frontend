@@ -12,6 +12,7 @@ export interface TransactionCreateDTO {
   type: TxType; accountId: number; categoryId: number;
   amount: number; date: string; description?: string;
 }
+export type TransactionUpdateDTO = Partial<TransactionCreateDTO>;
 
 @Injectable({ providedIn: 'root' })
 export class TransactionsApi {
@@ -24,6 +25,9 @@ export class TransactionsApi {
   }
   create(body: TransactionCreateDTO) {
     return this.http.post<TransactionDTO>(`${this.base}/transactions`, body);
+  }
+  update(id: number, body: TransactionUpdateDTO) {
+    return this.http.patch<TransactionDTO>(`${this.base}/transactions/${id}`, body);
   }
   delete(id: number) { return this.http.delete<void>(`${this.base}/transactions/${id}`); }
 }

@@ -1,0 +1,57 @@
+id,date,type,category,account,description,amount
+71,2025-10-12,expense,Mercado,ActivoBank,Spar,4.18
+72,2025-10-11,expense,Mascotas,ActivoBank,Amazon Compra pannales Lila,9.45
+70,2025-10-11,expense,Mercado,ActivoBank,Spar,2.48
+69,2025-10-11,expense,Mercado,ActivoBank,Spar,11.23
+68,2025-10-09,expense,Mercado,ActivoBank,Spar,6.82
+74,2025-10-08,income,Ahorro,NovoBanco,Retiro Ahorro,119.76
+73,2025-10-08,expense,Ahorro,Ahorro NovoBanco,Retiro Ahorro,119.76
+66,2025-10-08,expense,Servicios,ActivoBank,Meo,84.38
+65,2025-10-08,expense,Mascotas,ActivoBank,Compra Leroy Marlin tablas para estante pecera,66.98
+67,2025-10-07,expense,Mercado,NovoBanco,Spar,2.19
+64,2025-10-07,expense,Entretenimiento,NovoBanco,Subscripcion Scribd,10.99
+63,2025-10-07,expense,Otros,ActivoBank,Compra YING XIAOYAN,6.75
+62,2025-10-07,expense,Mercado,ActivoBank,Pingo Doce,43.34
+61,2025-10-06,expense,Transporte,ActivoBank,Bolt,6.43
+60,2025-10-06,expense,Ropa,ActivoBank,Compra C&A GaiaShopping,97.35
+59,2025-10-06,expense,Transporte,ActivoBank,Uber,8.48
+58,2025-10-06,expense,Comidas,ActivoBank,Dulces y cafe GaiaShopping,9.50
+57,2025-10-06,expense,Ropa,ActivoBank,Continente GaiaShopping,9.06
+56,2025-10-06,expense,Comidas,ActivoBank,Tomatino GaiaShopping,17.70
+55,2025-10-06,expense,Ropa,NovoBanco,Compra C&A GaiaShopping,56.21
+53,2025-10-06,expense,Entretenimiento,NovoBanco,Subscripcion PlayStation,16.99
+52,2025-10-06,expense,Envios Cuba,NovoBanco,Envio Cuballama Ana Maria,153.21
+51,2025-10-06,expense,Envios Cuba,NovoBanco,Envio Cuballama Maria Elena,153.21
+50,2025-10-06,expense,Comidas,NovoBanco,Sabor gaucho GaiaShopping,16.40
+49,2025-10-06,expense,Comidas,NovoBanco,Pizza Hut GaiaShopping,8.45
+34,2025-10-06,expense,Otros,ActivoBank,LEV ATM,50.00
+42,2025-10-05,expense,Entretenimiento,NovoBanco,PAGO PLAYSTATION,7.99
+41,2025-10-04,expense,Merienda,NovoBanco,A SUPER 2000,0.80
+35,2025-10-04,expense,Entretenimiento,ActivoBank,Netflix,17.99
+12,2025-10-04,expense,Mercado,Coverflex,PINGO DOCE,51.51
+36,2025-10-03,expense,Merienda,NovoBanco,A SUPER 2000,0.80
+30,2025-10-03,expense,Servicios,ActivoBank,PLANO AB PREMIUM,8.99
+29,2025-10-03,expense,Servicios,ActivoBank,PAGO AGUA,29.44
+11,2025-10-03,expense,Mercado,Coverflex,SPAR,7.94
+28,2025-10-02,expense,Comidas,ActivoBank,Pizza Hut,23.40
+10,2025-10-02,expense,Mercado,Coverflex,SPAR,6.16
+46,2025-10-01,income,Ahorro,Ahorro NovoBanco,Ahorro puntual,269.52
+45,2025-10-01,expense,Ahorro,NovoBanco,Ahorro puntual,269.52
+27,2025-10-01,income,Servicios,ActivoBank,CRÉDITO CASHBACK PLANO AB,6.00
+26,2025-10-01,expense,Vivienda,ActivoBank,Renta,700.00
+25,2025-10-01,expense,Otros,ActivoBank,COMPRA 5679 Google Play Apps Dublin IE,4.99
+24,2025-10-01,expense,Servicios,ActivoBank,EDP COMERCIAL,7.90
+23,2025-10-01,expense,Servicios,ActivoBank,Domestic and G,7.99
+9,2025-10-01,expense,Mercado,Coverflex,SPAR,2.92
+39,2025-09-30,expense,Comidas,NovoBanco,COMPRA REST BRASAO ANTAS,65.10
+37,2025-09-30,expense,Otros,NovoBanco,AMAZON,78.18
+19,2025-09-30,expense,Servicios,ActivoBank,OPENAI CHATGPT,23.00
+18,2025-09-30,expense,Servicios,ActivoBank,MEO ENERGIA,89.00
+38,2025-09-29,expense,Merienda,NovoBanco, A SUPER 2000 ,0.80
+17,2025-09-29,expense,Otros,ActivoBank,LEV ATM,20.00
+8,2025-09-29,expense,Mercado,Coverflex,SPAR,2.32
+7,2025-09-28,expense,Mercado,Coverflex,SPAR,65.42
+6,2025-09-26,expense,Mercado,Coverflex,SPAR,10.20
+5,2025-09-26,income,Salario,Coverflex,Pago alimentacion,146.20
+4,2025-09-26,income,Salario,NovoBanco,PAGAMENTO SALARIO,969.52
+1,2025-09-26,income,Salario,ActivoBank,Pagamento de Vencimento,1785.82

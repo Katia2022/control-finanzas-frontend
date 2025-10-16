@@ -2,11 +2,29 @@ package com.finanzas.transactions;
 
 import com.finanzas.accounts.Account;
 import com.finanzas.categories.Category;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class TransactionDto {
+    public static class Create {
+        @NotNull public Transaction.Type type;
+        @NotNull public Long accountId;
+        @NotNull public Long categoryId;
+        @NotNull public Double amount;
+        @NotBlank public String date; // yyyy-MM-dd
+        public String description;
+    }
+
+    public static class Update {
+        public Transaction.Type type;
+        public Long accountId;
+        public Long categoryId;
+        public Double amount;
+        public String date; // yyyy-MM-dd
+        public String description;
+    }
     public static class View {
         public Long id;
         public Transaction.Type type;
@@ -33,4 +51,3 @@ public class TransactionDto {
         return v;
     }
 }
-

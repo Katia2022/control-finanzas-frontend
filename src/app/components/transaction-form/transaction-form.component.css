@@ -1,52 +1,48 @@
-/* Uses shared .card and .card__header styles from src/styles.css */
-
 .form { display: flex; flex-direction: column; gap: 1.25rem; }
 
 .form__row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
-.form__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.95rem;
-  color: #1f2933;
-}
+.form__field { display: flex; flex-direction: column; gap: 0.35rem; }
 
 .form__field > span { font-weight: 600; }
 
-.form__field input,
-.form__field select {
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+.form__field .p-inputtext::placeholder { opacity: .8; }
+.form__field .p-select .p-inputtext::placeholder { opacity: .8; }
+
+/* Keep PrimeNG controls same width and stable on value change */
+.form__field .p-select,
+.form__field .p-inputtext,
+.form__field .p-inputnumber,
+.form__field .p-datepicker {
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.form__field input:focus,
-.form__field select:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-}
+.form__field small { color: var(--red-600, #dc2626); font-size: 0.78rem; }
 
-.form__field small { color: #dc2626; font-size: 0.78rem; }
-
-.button {
-  align-self: flex-start;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  color: #f9fafb;
-  border: none;
+/* PrimeNG submit button small size */
+.p-button.btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
   border-radius: 999px;
-  padding: 0.75rem 1.75rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  width: auto !important;            /* do not stretch */
+  max-width: max-content;            /* shrink-to-fit */
+  display: inline-flex;              /* natural button width */
+  align-self: flex-end;            /* align like a normal button */
 }
 
-.button:hover { transform: translateY(-1px); box-shadow: 0 16px 20px -20px rgba(37, 99, 235, 0.8); }
+/* Ensure PrimeNG button inside the form never stretches full width */
+.form > .p-button {
+  width: auto !important;
+  max-width: max-content;
+}
+
+.form__actions {
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+}

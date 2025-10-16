@@ -6,9 +6,17 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "transactions")
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString(exclude = {"account", "category"})
 public class Transaction {
     public enum Type { INCOME, EXPENSE }
 
@@ -33,20 +41,4 @@ public class Transaction {
 
     @Column(length = 255)
     private String description;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Type getType() { return type; }
-    public void setType(Type type) { this.type = type; }
-    public Account getAccount() { return account; }
-    public void setAccount(Account account) { this.account = account; }
-    public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 }
-
